@@ -2,26 +2,40 @@ using UnityEngine;
 
 public class SteeringBase : MonoBehaviour
 {
+    [Header("Steering")]
     [SerializeField] protected float _maxSpeed;
     [SerializeField] protected float _maxForce;
     [SerializeField] protected float _slowingRange = 3f;
     [SerializeField] protected float _timePrediction = 3f;
+
+
     [SerializeField] protected float _rotationForce;
     [SerializeField] protected float _radius;
     [SerializeField] protected float _personalArea;
     [SerializeField] protected float _avoidanceWeight;
     [SerializeField] LayerMask _obstacleMask;
     protected Vector3 _velocity;
+    public Vector3 Velocity => _velocity;
     protected ObstacleAvoidance _avoid;
 
-    protected void Awake()
+    protected virtual void Awake()
     {
         _avoid = new ObstacleAvoidance(transform, _radius, _personalArea, _obstacleMask);
     }
 
+    protected virtual void Update()
+    {
+        if (_velocity.sqrMagnitude > 0.0001f)
+        {
+            transform.position += _velocity * Time.deltaTime;
+            transform.forward = _velocity.normalized;
+        }
+    }
+
     protected Vector3 Seek(Vector3 target)
     {
-        Vector3 desired = (target - transform.position).normalized * _maxSpeed;
+        Vector3 desired = target - transform.position;
+        desired = desired.normalized * _maxSpeed;
         return  CalculateSteering(desired);
     }
 

@@ -4,6 +4,7 @@ using UnityEngine;
 public class FlockingManager : MonoBehaviour
 {
     public static FlockingManager Instance;
+
     public List<Boid> _allBoids;
     public List<Boid> AllBoids => _allBoids;
 

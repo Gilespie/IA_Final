@@ -2,19 +2,20 @@ using UnityEngine;
 
 public class SteeringAgent : MonoBehaviour
 {
-    [SerializeField] private Transform _target;
-    [SerializeField] private float _maxSpeed;
-    [SerializeField] private float _timePrediction;
-    [SerializeField] private float _slowingRange;
+    [SerializeField] Transform _target;
+    public Transform Target => _target;
+    [SerializeField] float _maxSpeed;
+    [SerializeField] float _timePrediction;
+    [SerializeField] float _slowingRange;
     //[SerializeField] private Steerings _steering;
-    [SerializeField] private float _avoidanceDetectionRange;
-    [SerializeField] private float _personalArea;
-    [SerializeField] private LayerMask _obstacleMask;
-    private ISteering _currentSteering;
-    private ObstacleAvoidance _obstacleAvoidance;
-    private Vector3 _velocity;
+    [SerializeField] float _avoidanceDetectionRange;
+    [SerializeField] float _personalArea;
+    [SerializeField] LayerMask _obstacleMask;
+    ISteering _currentSteering;
+    ObstacleAvoidance _obstacleAvoidance;
+    Vector3 _velocity;
 
-    private void Start()
+    void Start()
     {
         //switch(_steering)
         //{
