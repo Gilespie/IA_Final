@@ -38,6 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
+  m_IndirectSpecularColor: {r: 0.18028301, g: 0.22571309, b: 0.30692127, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -131,7 +132,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 91862060}
-  m_Layer: 0
+  - component: {fileID: 91862062}
+  - component: {fileID: 91862061}
+  - component: {fileID: 91862063}
+  m_Layer: 8
   m_Name: Lider2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -154,6 +158,78 @@ Transform:
   - {fileID: 364076715}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &91862061
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 91862059}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb9989e9af2394c149a201958a5c0bfe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _angleRange: 90
+  _visionRange: 100
+  _layerMask:
+    serializedVersion: 2
+    m_Bits: 1
+--- !u!114 &91862062
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 91862059}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bdf505246d3e724e9c496b4c7193f55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxSpeed: 5
+  _maxForce: 10
+  _slowingRange: 3
+  _timePrediction: 3
+  _rotationForce: 5
+  _radius: 0.5
+  _personalArea: 0.3
+  _avoidanceWeight: 2
+  _obstacleMask:
+    serializedVersion: 2
+    m_Bits: 64
+  _enemyTarget: {fileID: 1152775092}
+  _fov: {fileID: 1152775094}
+  _maxHealth: 100
+  _moveSpeed: 1
+  _persuitSpeed: 3
+  _distanceStopOffset: 0.3
+  _damage: 50
+  _attackCooldown: 1
+  _attackRadius: 1.5
+  _enemyMask:
+    serializedVersion: 2
+    m_Bits: 1
+  _groundMask:
+    serializedVersion: 2
+    m_Bits: 4096
+  _isPlayerControlled: 1
+--- !u!114 &91862063
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 91862059}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f452eef6cc2e549e3a33f2e8c021308e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _minX: -20
+  _maxX: 20
+  _minZ: -20
+  _maxZ: 20
 --- !u!1 &211181573
 GameObject:
   m_ObjectHideFlags: 0
@@ -287,14 +363,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 216212040}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &216212042
 MeshRenderer:
@@ -643,14 +719,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 299631031}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &299631033
 MeshRenderer:
@@ -745,14 +821,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 300596020}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &300596022
 MeshRenderer:
@@ -952,14 +1028,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 321401516}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &321401518
 MeshRenderer:
@@ -1160,14 +1236,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 338422724}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &338422726
 MeshRenderer:
@@ -1579,14 +1655,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 437278728}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &437278730
 MeshRenderer:
@@ -1891,14 +1967,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 511933040}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &511933042
 MeshRenderer:
@@ -2098,14 +2174,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 539585635}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &539585637
 MeshRenderer:
@@ -2200,14 +2276,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 641991487}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &641991489
 MeshRenderer:
@@ -2302,14 +2378,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 676501573}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &676501575
 MeshRenderer:
@@ -2404,14 +2480,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 697122916}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &697122918
 MeshRenderer:
@@ -2600,14 +2676,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 708797990}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &708797992
 MeshRenderer:
@@ -2683,6 +2759,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 737858218}
+  - component: {fileID: 737858219}
+  - component: {fileID: 737858220}
+  - component: {fileID: 737858221}
   m_Layer: 0
   m_Name: Solder (1)
   m_TagString: Untagged
@@ -2706,6 +2785,83 @@ Transform:
   - {fileID: 1489818608}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &737858219
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 737858217}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 424d3eb46a7ec0642aa7288eb28eb618, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxSpeed: 5
+  _maxForce: 8
+  _slowingRange: 3
+  _timePrediction: 3
+  _rotationForce: 4
+  _radius: 0.5
+  _personalArea: 0.3
+  _avoidanceWeight: 1
+  _obstacleMask:
+    serializedVersion: 2
+    m_Bits: 64
+  _lider: {fileID: 91862062}
+  _viewRadius: 6
+  _viewAngle: 90
+  _maxHealth: 100
+  _lowHealthThreshold: 30
+  _separationRadius: 1.5
+  _arriveRadius: 2
+  _separationWeight: 1.5
+  _arriveWeight: 1
+  _damage: 25
+  _attackRadius: 1.5
+  _attackCooldown: 1
+  _enemyMask:
+    serializedVersion: 2
+    m_Bits: 1
+--- !u!114 &737858220
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 737858217}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4938cd26ffb11458497fa3ade0a2d305, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxSpeed: 4
+  _maxForce: 8
+  _slowingRange: 3
+  _timePrediction: 3
+  _rotationForce: 4
+  _radius: 0.4
+  _personalArea: 0.25
+  _avoidanceWeight: 2
+  _obstacleMask:
+    serializedVersion: 2
+    m_Bits: 64
+--- !u!114 &737858221
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 737858217}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f452eef6cc2e549e3a33f2e8c021308e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _minX: -20
+  _maxX: 20
+  _minZ: -20
+  _maxZ: 20
 --- !u!1 &866837572
 GameObject:
   m_ObjectHideFlags: 0
@@ -2734,14 +2890,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 866837572}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &866837574
 MeshRenderer:
@@ -2836,14 +2992,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 902001064}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &902001066
 MeshRenderer:
@@ -2938,14 +3094,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 923549823}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &923549825
 MeshRenderer:
@@ -3132,14 +3288,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 967517229}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &967517231
 MeshRenderer:
@@ -3339,14 +3495,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1057582140}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1057582142
 MeshRenderer:
@@ -3441,14 +3597,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1064342791}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1064342793
 MeshRenderer:
@@ -3543,14 +3699,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1096781107}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1096781109
 MeshRenderer:
@@ -3626,6 +3782,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1106336041}
+  - component: {fileID: 1106336042}
   m_Layer: 0
   m_Name: FlockingManager
   m_TagString: Untagged
@@ -3648,6 +3805,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1106336042
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1106336040}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 756f862281db863458fab8a83d6c8255, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _lider: {fileID: 1152775093}
+  _allSolders: []
 --- !u!1 &1125156748
 GameObject:
   m_ObjectHideFlags: 0
@@ -3706,6 +3877,7 @@ GameObject:
   - component: {fileID: 1152775092}
   - component: {fileID: 1152775093}
   - component: {fileID: 1152775094}
+  - component: {fileID: 1152775095}
   m_Layer: 0
   m_Name: Lider1
   m_TagString: Untagged
@@ -3741,29 +3913,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bdf505246d3e724e9c496b4c7193f55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxSpeed: 0
-  _maxForce: 0
-  _slowingRange: 0
-  _timePrediction: 0
-  _rotationForce: 0
-  _radius: 0
-  _personalArea: 0
-  _avoidanceWeight: 0
+  _maxSpeed: 4
+  _maxForce: 7
+  _slowingRange: 0.5
+  _timePrediction: 0.5
+  _rotationForce: 3
+  _radius: 90
+  _personalArea: 50
+  _avoidanceWeight: 2
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _enemyTarget: {fileID: 0}
-  _clickTarget: {x: 0, y: 0, z: 0}
-  _fov: {fileID: 1152775094}
-  _distanceOffset: 0.3
+  _enemyTarget: {fileID: 91862060}
+  _fov: {fileID: 91862061}
   _maxHealth: 100
   _moveSpeed: 1
   _persuitSpeed: 3
+  _distanceStopOffset: 0.3
   _damage: 50
+  _attackCooldown: 1
   _attackRadius: 1.5
+  _enemyMask:
+    serializedVersion: 2
+    m_Bits: 256
   _groundMask:
     serializedVersion: 2
     m_Bits: 4096
+  _isPlayerControlled: 1
 --- !u!114 &1152775094
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3773,7 +3949,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1152775090}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d0054c6b408a7745a1e396a5f0a5872, type: 3}
+  m_Script: {fileID: 11500000, guid: fb9989e9af2394c149a201958a5c0bfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _angleRange: 90
@@ -3781,6 +3957,22 @@ MonoBehaviour:
   _layerMask:
     serializedVersion: 2
     m_Bits: 256
+--- !u!114 &1152775095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1152775090}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f452eef6cc2e549e3a33f2e8c021308e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _minX: -20
+  _maxX: 20
+  _minZ: -20
+  _maxZ: 20
 --- !u!1 &1185689232
 GameObject:
   m_ObjectHideFlags: 0
@@ -3809,14 +4001,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1185689232}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1185689234
 MeshRenderer:
@@ -3911,14 +4103,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1255519488}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1255519490
 MeshRenderer:
@@ -4013,14 +4205,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1306866836}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1306866838
 MeshRenderer:
@@ -4115,14 +4307,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1328583853}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1328583855
 MeshRenderer:
@@ -4322,14 +4514,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1338129059}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1338129061
 MeshRenderer:
@@ -4424,14 +4616,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1372240250}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1372240252
 MeshRenderer:
@@ -4526,14 +4718,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1412800163}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1412800165
 MeshRenderer:
@@ -4628,14 +4820,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1431533322}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1431533324
 MeshRenderer:
@@ -5047,14 +5239,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1517570321}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1517570323
 MeshRenderer:
@@ -5149,14 +5341,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1523850849}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1523850851
 MeshRenderer:
@@ -5356,14 +5548,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1532320621}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1532320623
 MeshRenderer:
@@ -5458,14 +5650,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1577118247}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1577118249
 MeshRenderer:
@@ -5665,14 +5857,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1611878035}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1611878037
 MeshRenderer:
@@ -5767,14 +5959,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1612947693}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1612947695
 MeshRenderer:
@@ -5869,14 +6061,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1750620455}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1750620457
 MeshRenderer:
@@ -5952,6 +6144,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1772183237}
+  - component: {fileID: 1772183238}
+  - component: {fileID: 1772183239}
+  - component: {fileID: 1772183240}
   m_Layer: 0
   m_Name: Solder
   m_TagString: Untagged
@@ -5975,6 +6170,83 @@ Transform:
   - {fileID: 397450555}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1772183238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1772183236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 424d3eb46a7ec0642aa7288eb28eb618, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxSpeed: 5
+  _maxForce: 8
+  _slowingRange: 3
+  _timePrediction: 3
+  _rotationForce: 4
+  _radius: 0.5
+  _personalArea: 0.2
+  _avoidanceWeight: 1
+  _obstacleMask:
+    serializedVersion: 2
+    m_Bits: 64
+  _lider: {fileID: 1152775093}
+  _viewRadius: 6
+  _viewAngle: 90
+  _maxHealth: 100
+  _lowHealthThreshold: 30
+  _separationRadius: 1.5
+  _arriveRadius: 2
+  _separationWeight: 1.5
+  _arriveWeight: 1
+  _damage: 25
+  _attackRadius: 1.5
+  _attackCooldown: 1
+  _enemyMask:
+    serializedVersion: 2
+    m_Bits: 256
+--- !u!114 &1772183239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1772183236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4938cd26ffb11458497fa3ade0a2d305, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxSpeed: 4
+  _maxForce: 8
+  _slowingRange: 3
+  _timePrediction: 3
+  _rotationForce: 4
+  _radius: 0.4
+  _personalArea: 0.25
+  _avoidanceWeight: 2
+  _obstacleMask:
+    serializedVersion: 2
+    m_Bits: 64
+--- !u!114 &1772183240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1772183236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f452eef6cc2e549e3a33f2e8c021308e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _minX: -20
+  _maxX: 20
+  _minZ: -20
+  _maxZ: 20
 --- !u!1 &1774866805
 GameObject:
   m_ObjectHideFlags: 0
@@ -6003,14 +6275,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1774866805}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1774866807
 MeshRenderer:
@@ -6210,14 +6482,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1797219147}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1797219149
 MeshRenderer:
@@ -6312,14 +6584,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1811355724}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1811355726
 MeshRenderer:
@@ -6414,14 +6686,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1818049727}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1818049729
 MeshRenderer:
@@ -6516,14 +6788,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1835439139}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1835439141
 MeshRenderer:
@@ -6828,14 +7100,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1960540918}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &1960540920
 MeshRenderer:
@@ -6930,14 +7202,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 2009358548}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &2009358550
 MeshRenderer:
@@ -7032,14 +7304,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 2043782073}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &2043782075
 MeshRenderer:
@@ -7134,14 +7406,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 2066940473}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &2066940475
 MeshRenderer:
@@ -7341,14 +7613,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 2114875684}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9020757bf475d6e4eaca27448f92301f, type: 3}
+  m_Script: {fileID: 11500000, guid: f489b1cb4eae1429da87c2db5e7f7424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _neighbors: []
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  _isWall: 0
+  _isWall: 1
   _cost: 1
 --- !u!23 &2114875686
 MeshRenderer:

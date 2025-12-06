@@ -14,7 +14,7 @@ public class FlockingManagerExamen : MonoBehaviour
         if (!Instance)
         {
             Instance = this;
-
+            _allSolders = new List<Solder>();
             DontDestroyOnLoad(gameObject);
         }
         else

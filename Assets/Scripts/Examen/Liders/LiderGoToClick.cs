@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class LiderGoToClick : State<NPCState>
@@ -12,11 +11,11 @@ public class LiderGoToClick : State<NPCState>
 
     public override void Execute()
     {
-        /*if (_lider.FOVV.InFOV(_lider.EnemyTarget.position))
+        if (_lider.FindEnemyInFOV())
         {
             _fsm.ChangeState(NPCState.Persuit);
             return;
-        }*/
+        }
 
         if (!_lider.HasPath)
         {
@@ -24,13 +23,6 @@ public class LiderGoToClick : State<NPCState>
             return;
         }
 
-        Vector3 target = _lider.CurrentPathPoint;
-        float dist = Vector3.Distance(_lider.transform.position, target);
-
-        if (dist < 0.2f)
-        {
-            _lider.NextPathPoint();
-            return;
-        }
+        _lider.MoveByPath(_lider.MovSpeed);
     }
 }

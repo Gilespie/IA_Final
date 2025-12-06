@@ -11,27 +11,14 @@ public class LiderPersuit : State<NPCState>
 
     public override void Execute()
     {
-        if (!_lider.FOVV.InFOV(_lider.EnemyTarget.position))
+        if (_lider.EnemyTarget == null || !_lider.FOVV.InFOV(_lider.EnemyTarget.position))
         {
-            if (_lider.HasPath)
-                _fsm.ChangeState(NPCState.FollowToClick);
-            else
-                _fsm.ChangeState(NPCState.Idle);
-
+            _lider.ClearEnemyTarget();
+            _lider.StopCompletely();
+            _fsm.ChangeState(NPCState.Idle);
             return;
         }
 
-        float dist = Vector3.Distance(
-            _lider.transform.position,
-            _lider.EnemyTarget.position
-        );
-
-        if (dist <= _lider.AttackRadius)
-        {
-
-            return;
-        }
-
-        
+        _lider.PersuitTarget();
     }
 }

@@ -36,16 +36,6 @@ public class PathManagerExamen : MonoBehaviour
         return path;
     }
 
-    private bool NodeIsTarget(Graph current, Vector3 targetPos)
-    {
-        return Vector3.Distance(current.transform.position, targetPos) < 10;
-    }
-
-    private List<Graph> GetNeighbors(Graph current)
-    {
-        return current.Neighbors;
-    }
-
     public Graph Closest(Vector3 pos)
     {
         float minDistance = int.MaxValue;
