@@ -3,6 +3,7 @@ using System.Collections.Generic;
 public class FSM<T>
 {
     private IState<T> _currentState;
+
     public IState<T> CurrentState => _currentState;
 
     public void SetInnitialFSM(IState<T> firstState)
@@ -17,10 +18,10 @@ public class FSM<T>
 
     public void ChangeState(T input)
     {
-        if (_currentState.GetTransition(input, out IState<T> newState))
+        if (_currentState.GetTransition(input, out IState<T> next))
         {
             _currentState.Exit();
-            _currentState = newState;
+            _currentState = next;
             _currentState.Enter();
         }
     }

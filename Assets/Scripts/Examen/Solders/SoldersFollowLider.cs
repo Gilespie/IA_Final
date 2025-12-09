@@ -1,31 +1,31 @@
 using UnityEngine;
 
-public class SoldersFollowLider : State<NPCState>
+public class SoldersFollowLeader : State<NPCState>
 {
-    Solder _solder;
+    Solder _s;
 
-    public SoldersFollowLider(FSM<NPCState> fsm, Solder solder) : base(fsm)
+    public SoldersFollowLeader(FSM<NPCState> fsm, Solder s) : base(fsm)
     {
-        _solder = solder;
+        _s = s;
     }
 
     public override void Execute()
     {
-        if (_solder.IsLowHealth)
+        // Приоритет: низкое HP важнее всего (каждый солдат проверяет СВОЕ HP независимо)
+        if (_s.IsLowHP)
         {
+            Debug.Log($"{_s.gameObject.name} HP низкое ({_s.CurrentHP:F1}/{_s.MaxHealth}), убегает! (другие солдаты продолжают бой)");
             _fsm.ChangeState(NPCState.Salvation);
             return;
         }
 
-        if (_solder.CheckEnemyInFOV())
+        if (_s.CheckEnemyInFOV())
         {
+            Debug.Log($"{_s.gameObject.name} видит врага, переходит в атаку");
             _fsm.ChangeState(NPCState.Persuit);
             return;
         }
 
-        if (_solder.Lider != null)
-        {
-            _solder.FollowLeader();
-        }
+        _s.FollowLeader();
     }
 }

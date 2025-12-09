@@ -2,27 +2,64 @@ using UnityEngine;
 
 public class LiderGoToClick : State<NPCState>
 {
-    Lider _lider;
+    Lider _l;
 
-    public LiderGoToClick(FSM<NPCState> fsm, Lider lider) : base(fsm)
+    public LiderGoToClick(FSM<NPCState> fsm, Lider l) : base(fsm)
     {
-        _lider = lider;
+        _l = l;
     }
 
     public override void Execute()
     {
-        if (_lider.FindEnemyInFOV())
+        // ПРИОРИТЕТ #1: Низкое HP - убегаем
+        if (_l.IsLowHP)
         {
-            _fsm.ChangeState(NPCState.Persuit);
+            _fsm.ChangeState(NPCState.Salvation);
             return;
         }
 
-        if (!_lider.HasPath)
+        // ПРИОРИТЕТ #2: Если наступаем на врага во время движения - атакуем его
+        // (Игровой лидер атакует врага, если наступает на него первым)
+        if (_l.FindEnemyInRadius())
         {
-            _fsm.ChangeState(NPCState.Idle);
-            return;
+            float dist = Vector3.Distance(_l.transform.position, _l.EnemyTarget.position);
+            if (dist <= _l.AttackRadius)
+            {
+                // Наступаем на врага - атакуем
+                _l.PersuitTarget();
+                return;
+            }
+            else
+            {
+                // Враг рядом, но не в радиусе атаки - преследуем
+                _fsm.ChangeState(NPCState.Persuit);
+                return;
+            }
         }
 
-        _lider.MoveByPath(_lider.MovSpeed);
+        // ПРИОРИТЕТ #3: Новый клик мыши
+        if (_l.Controller != null && _l.Controller.HasNewClick)
+        {
+            _l.SetPathToClick(_l.ClickPosition);
+        }
+
+        // Движемся к точке клика
+        if (!_l.MoveByPath(_l.MovSpeed))
+        {
+            // Если достигли цели, очищаем клик
+            if (_l.Controller != null)
+                _l.Controller.ClearClick();
+
+            // Если достигли цели и нет нового клика, проверяем врагов
+            if (_l.FindEnemyInFOV())
+            {
+                _fsm.ChangeState(NPCState.Persuit);
+            }
+            else
+            {
+                _fsm.ChangeState(NPCState.Idle);
+            }
+            return;
+        }
     }
 }

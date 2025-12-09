@@ -5,9 +5,10 @@ public class PathManagerExamen : MonoBehaviour
 {
     public static PathManagerExamen Instance;
 
-    [SerializeField] Graph[] _allGraphs;
-    public Graph[] AllNodes => _allGraphs;
-    [SerializeField] LayerMask _obstacleMask;
+    [SerializeField] private Graph[] _allNodes;
+    [SerializeField] private LayerMask _obstacleMask;
+
+    public Graph[] AllNodes => _allNodes;
 
     private void Awake()
     {
@@ -16,21 +17,23 @@ public class PathManagerExamen : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
-        else
-        {
-            Destroy(gameObject);
-        }
+        else Destroy(gameObject);
     }
 
-    public List<Graph> GetPath(Vector3 startPos, Vector3 endPos)
+    public List<Graph> GetPath(Vector3 from, Vector3 to)
     {
-        var start = Closest(startPos);
-        var end = Closest(endPos);
+        var start = Closest(from);
+        var end = Closest(to);
+
+        if (start == null || end == null)
+            return new List<Graph>();
+
         var path = PathfindingExamen.ThetaStar(start, end, _obstacleMask);
 
         for (int i = 0; i < path.Count; i++)
         {
-            path[i].Color = Color.Lerp(path[i].DefaultColor, Color.green, (float)i / path.Count);
+            Color c = Color.Lerp(Color.cyan, Color.green, (float)i / path.Count);
+            path[i].SetColor(c);
         }
 
         return path;
@@ -38,20 +41,18 @@ public class PathManagerExamen : MonoBehaviour
 
     public Graph Closest(Vector3 pos)
     {
-        float minDistance = int.MaxValue;
-        Graph closest = null;
+        Graph best = null;
+        float min = Mathf.Infinity;
 
-        for (int i = 0; i < _allGraphs.Length; i++)
+        foreach (var node in _allNodes)
         {
-            var node = _allGraphs[i];
-            var distance = (node.transform.position - pos).sqrMagnitude;
-
-            if (distance < minDistance)
+            float dist = (node.transform.position - pos).sqrMagnitude;
+            if (dist < min)
             {
-                closest = node;
-                minDistance = distance;
+                best = node;
+                min = dist;
             }
         }
-        return closest;
+        return best;
     }
 }

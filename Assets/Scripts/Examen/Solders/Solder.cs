@@ -3,108 +3,98 @@ using UnityEngine;
 
 public class Solder : SteeringBase, IDamageable
 {
-    private FSM<NPCState> _fsm;
-    public FSM<NPCState> FSM => _fsm;
+    FSM<NPCState> _fsm;
 
-    [SerializeField] private Lider _lider;
+    [Header("Leader Reference")]
+    [SerializeField] Lider _lider;
+
     public Lider Lider => _lider;
 
     [Header("FOV")]
-    [SerializeField] private float _viewRadius = 6f;
-    [SerializeField] private float _viewAngle = 90f;
-    public float ViewRadius => _viewRadius;
-    public float ViewAngle => _viewAngle;
+    [SerializeField] float _viewRadius = 6f;
+    [SerializeField] float _viewAngle = 90f;
+    [SerializeField] LayerMask _enemyMask;
+
+    Transform _currentTarget;
 
     [Header("Health")]
-    [SerializeField] private float _maxHealth = 100f;
-    [SerializeField] private float _lowHealthThreshold = 30f;
-    private float _currentHealth;
-    public float CurrentHealth => _currentHealth;
-    public float HealthPercentage => _currentHealth / _maxHealth;
-    public bool IsLowHealth => _currentHealth <= _lowHealthThreshold;
+    [SerializeField] float _maxHealth = 100f;
+    [SerializeField] float _lowHP = 30f;
+    [SerializeField] float _healthRecoveryRate = 5f;
+    float _currentHP;
 
-    [Header("Movement")]
-    [SerializeField] private float _separationRadius = 1.5f;
-    [SerializeField] private float _arriveRadius = 2f;
-    public float SeparationRadius => _separationRadius;
-    public float ArriveRadius => _arriveRadius;
+    public float CurrentHP => _currentHP;
+    public float MaxHealth => _maxHealth;
+    public bool IsLowHP => _currentHP <= _lowHP;
 
-    [Header("Weights")]
-    [SerializeField, Range(0, 3)] private float _separationWeight = 1.5f;
-    [SerializeField, Range(0, 3)] private float _arriveWeight = 1f;
-    public float SeparationWeight => _separationWeight;
-    public float ArriveWeight => _arriveWeight;
-
-    [Header("Attack")]
-    [SerializeField] private float _damage = 25f;
-    [SerializeField] private float _attackRadius = 1.5f;
-    [SerializeField] private float _attackCooldown = 1f;
-    private float _attackTimer = 0f;
-    public float Damage => _damage;
-    public float AttackRadius => _attackRadius;
-
-    [Header("Layers")]
-    [SerializeField] private LayerMask _enemyMask;
-    public LayerMask EnemyMask => _enemyMask;
-
-    private FlockingManagerExamen _flockingManagerExamen => FlockingManagerExamen.Instance;
-
-    private Transform _currentEnemyTarget;
-    public Transform CurrentEnemyTarget => _currentEnemyTarget;
-
-    public void ClearEnemyTarget() => _currentEnemyTarget = null;
-
-    private List<Graph> _path;
-    private int _pathIndex;
-    private Vector3 _lastTarget;
-    private float _stuckTimer = 0f;
-    private Vector3 _lastPosition;
-
-    public List<Graph> Path => _path;
-    public int PathIndex => _pathIndex;
-    public bool HasPath => _path != null && _pathIndex < _path.Count;
-    public Vector3 CurrentPathPoint =>
-        _path != null && _pathIndex < _path.Count ? _path[_pathIndex].transform.position
-                                                  : transform.position;
-
-
-    private void Start()
+    public void RecoverHealth(float deltaTime)
     {
-        _currentHealth = _maxHealth;
-        _lastPosition = transform.position;
-
-        _flockingManagerExamen.AddSolder(this);
-        SetFSM();
+        if (_currentHP < _maxHealth)
+        {
+            _currentHP += _healthRecoveryRate * deltaTime;
+            _currentHP = Mathf.Min(_currentHP, _maxHealth);
+        }
     }
 
-    private void SetFSM()
+    [Header("Combat")]
+    [SerializeField] float _attackRadius = 1.5f;
+    [SerializeField] float _damage = 25f;
+    [SerializeField] float _attackCooldown = 1f;
+    float _attackTimer;
+
+    [Header("Flocking")]
+    [SerializeField] float _separationRadius = 2.5f;
+    [SerializeField] float _separationWeight = 2f;
+    [SerializeField] float _arriveWeight = 1f;
+
+    List<Graph> _path;
+    int _pathIndex;
+    float _stuckTimer;
+    Vector3 _lastPosition;
+    Vector3 _lastTarget;
+
+    void Start()
+    {
+        _currentHP = _maxHealth;
+        _attackTimer = 0f; // Можно атаковать сразу
+        _lastPosition = transform.position;
+
+        FlockingManagerExamen.Instance.AddSolder(this);
+
+        SetupFSM();
+
+        if (_enemyMask == 0)
+            Debug.LogError($"{gameObject.name}: Enemy Mask не настроен!");
+    }
+
+    void SetupFSM()
     {
         _fsm = new FSM<NPCState>();
 
-        var followLeader = new SoldersFollowLider(_fsm, this);
-        var persuit = new SolderPersuit(_fsm, this);
+        var follow = new SoldersFollowLeader(_fsm, this);
+        var pursue = new SolderPursuit(_fsm, this);
         var escape = new SolderEscape(_fsm, this);
 
-        followLeader.AddTransition(NPCState.Persuit, persuit);
-        followLeader.AddTransition(NPCState.Salvation, escape);
+        follow.AddTransition(NPCState.Persuit, pursue);
+        follow.AddTransition(NPCState.Salvation, escape);
 
-        persuit.AddTransition(NPCState.Salvation, escape);
-        persuit.AddTransition(NPCState.FollowToClick, followLeader);
+        pursue.AddTransition(NPCState.FollowToClick, follow);
+        pursue.AddTransition(NPCState.Salvation, escape);
 
-        escape.AddTransition(NPCState.FollowToClick, followLeader);
-        escape.AddTransition(NPCState.Persuit, persuit);
+        escape.AddTransition(NPCState.FollowToClick, follow);
+        escape.AddTransition(NPCState.Persuit, pursue);
 
-        _fsm.SetInnitialFSM(followLeader);
+        _fsm.SetInnitialFSM(follow);
     }
 
     protected override void Update()
     {
         base.Update();
-
         _fsm.OnUpdate();
+
         _attackTimer -= Time.deltaTime;
 
-        if (Vector3.Distance(transform.position, _lastPosition) < 0.1f)
+        if (Vector3.Distance(transform.position, _lastPosition) < 0.05f)
             _stuckTimer += Time.deltaTime;
         else
             _stuckTimer = 0f;
@@ -112,146 +102,240 @@ public class Solder : SteeringBase, IDamageable
         _lastPosition = transform.position;
     }
 
-    private void FixedUpdate()
+    void FixedUpdate()
     {
         _fsm.OnFixedUpdate();
     }
 
 
+
     public bool CheckEnemyInFOV()
     {
+        // Проверяем текущую цель
+        if (_currentTarget != null)
+        {
+            if (_currentTarget.gameObject.activeInHierarchy)
+            {
+                Vector3 dir = (_currentTarget.position - transform.position).normalized;
+                float dist = Vector3.Distance(transform.position, _currentTarget.position);
+
+                if (dist <= _viewRadius && 
+                    Vector3.Angle(transform.forward, dir) < _viewAngle / 2f &&
+                    !Physics.Raycast(transform.position, dir, dist, _obstacleMask))
+                {
+                    return true;
+                }
+                else
+                {
+                    // Враг вышел из FOV - очищаем цель
+                    _currentTarget = null;
+                }
+            }
+            else
+            {
+                // Враг деактивирован - очищаем цель
+                _currentTarget = null;
+            }
+        }
+
+        // Ищем новых врагов
         Collider[] enemies = Physics.OverlapSphere(transform.position, _viewRadius, _enemyMask);
 
-        foreach (var enemy in enemies)
+        if (enemies.Length == 0)
         {
-            Vector3 dir = (enemy.transform.position - transform.position).normalized;
+            return false;
+        }
 
-            if (Vector3.Angle(transform.forward, dir) < _viewAngle / 2f)
+        // ПРИОРИТЕТ: Сначала ищем солдат, потом лидеров
+        Transform closestSoldier = null;
+        float closestSoldierDist = float.MaxValue;
+        Transform closestLeader = null;
+        float closestLeaderDist = float.MaxValue;
+
+        foreach (var e in enemies)
+        {
+            if (e.transform == transform) continue;
+            if (!e.gameObject.activeInHierarchy) continue;
+
+            // Проверяем что это действительно враг (не союзник)
+            bool isEnemy = false;
+            bool isSoldier = false;
+            bool isLeader = false;
+            
+            // Проверяем если это солдат
+            var enemySolder = e.GetComponent<Solder>();
+            if (enemySolder != null)
             {
-                float distance = Vector3.Distance(transform.position, enemy.transform.position);
-                // _obstacleMask унаследован из SteeringBase
-                if (!Physics.Raycast(transform.position, dir, distance, _obstacleMask))
+                // Это враг если у него другой лидер или лидер null
+                if (enemySolder.Lider != _lider)
                 {
-                    _currentEnemyTarget = enemy.transform;
-                    return true;
+                    isEnemy = true;
+                    isSoldier = true;
+                }
+            }
+            // Проверяем если это лидер
+            else if (e.GetComponent<Lider>() != null)
+            {
+                // Лидер всегда враг (если он не наш лидер)
+                if (e.transform != _lider?.transform)
+                {
+                    isEnemy = true;
+                    isLeader = true;
+                }
+            }
+            else
+            {
+                // Если это не солдат и не лидер, но в enemyMask - значит враг
+                isEnemy = true;
+            }
+
+            if (!isEnemy) continue;
+
+            Vector3 dir = (e.transform.position - transform.position).normalized;
+            float angle = Vector3.Angle(transform.forward, dir);
+            float dist = Vector3.Distance(transform.position, e.transform.position);
+
+            // Проверяем FOV и Line of Sight
+            if (angle < _viewAngle / 2f)
+            {
+                if (!Physics.Raycast(transform.position, dir, dist, _obstacleMask))
+                {
+                    // ПРИОРИТЕТ: Сначала сохраняем солдат, потом лидеров
+                    if (isSoldier && dist < closestSoldierDist)
+                    {
+                        closestSoldier = e.transform;
+                        closestSoldierDist = dist;
+                    }
+                    else if (isLeader && dist < closestLeaderDist)
+                    {
+                        closestLeader = e.transform;
+                        closestLeaderDist = dist;
+                    }
                 }
             }
         }
 
-        _currentEnemyTarget = null;
+        // Выбираем цель: сначала солдат, если нет солдат - лидер
+        Transform closestEnemy = null;
+        float closestDist = float.MaxValue;
+        string enemyType = "";
+
+        if (closestSoldier != null)
+        {
+            closestEnemy = closestSoldier;
+            closestDist = closestSoldierDist;
+            enemyType = "солдат";
+        }
+        else if (closestLeader != null)
+        {
+            closestEnemy = closestLeader;
+            closestDist = closestLeaderDist;
+            enemyType = "лидер";
+        }
+
+        if (closestEnemy != null)
+        {
+            _currentTarget = closestEnemy;
+            Debug.Log($"{gameObject.name} нашел врага ({enemyType}): {closestEnemy.name} (расстояние: {closestDist:F2})");
+            return true;
+        }
+
         return false;
     }
-
-
-    public void Attack()
-    {
-        if (_currentEnemyTarget == null) return;
-
-        float distance = Vector3.Distance(transform.position, _currentEnemyTarget.position);
-
-        if (distance <= _attackRadius)
-        {
-            if (_attackTimer <= 0f)
-            {
-                IDamageable damageable = _currentEnemyTarget.GetComponent<IDamageable>();
-                if (damageable != null)
-                    damageable.TakeDamage(_damage);
-
-                _attackTimer = _attackCooldown;
-            }
-        }
-        else
-        {
-            FollowWithTheta(_currentEnemyTarget.position);
-        }
-    }
-
 
     public void FollowLeader()
     {
         if (_lider == null) return;
 
         Vector3 leaderPos = _lider.transform.position;
+        float distToLeader = Vector3.Distance(transform.position, leaderPos);
 
-        if (HasLineOfSight(leaderPos))
+        if (!HasLineOfSight(leaderPos))
         {
-            // Arrive к лидеру
-            Vector3 arriveVel = Arrive(_lider.transform, _velocity);
-            AddForce(arriveVel * _arriveWeight);
-
-            // Separation
-            Vector3 separation = Separation();
-            if (separation.sqrMagnitude > 0.01f)
-                AddForce(separation * _separationWeight);
-
-            // Avoidance
-            Vector3 avoidance = Avoid.ChangeVelocity(_velocity);
-            if (avoidance != _velocity)
-                AddForce((avoidance - _velocity) * AvoidanceWeight);
-        }
-        else
-        {
-            // если лидер за стеной, используем Theta*
-            FollowWithTheta(leaderPos);
-        }
-    }
-
-    public Vector3 Separation()
-    {
-        Vector3 desired = Vector3.zero;
-        int count = 0;
-
-        foreach (var boid in _flockingManagerExamen.AllSolders)
-        {
-            if (boid == this) continue;
-            if (boid.Lider != _lider) continue;
-
-            Vector3 dir = transform.position - boid.transform.position;
-
-            if (dir.sqrMagnitude > _separationRadius * _separationRadius)
-                continue;
-
-            count++;
-            desired += dir.normalized / dir.magnitude;
+            MoveWithTheta(leaderPos);
+            return;
         }
 
-        if (count == 0) return Vector3.zero;
+        Vector3 desiredVelocity = Vector3.zero;
 
-        desired /= count;
-        desired = desired.normalized * _maxSpeed;
+        if (distToLeader > 3f)
+        {
+            Vector3 offset = (leaderPos - transform.position).NoY();
+            float speed = _maxSpeed * Mathf.Min(distToLeader / _slowingRange, 1f);
+            desiredVelocity = offset.normalized * speed;
+        }
+        else if (distToLeader < 2f)
+        {
+            Vector3 offset = (transform.position - leaderPos).NoY();
+            desiredVelocity = offset.normalized * _maxSpeed * 0.5f;
+        }
 
-        return CalculateSteering(desired);
+        if (desiredVelocity.sqrMagnitude > 0.01f)
+        {
+            Vector3 arriveSteering = CalculateSteering(desiredVelocity);
+            AddForce(arriveSteering * _arriveWeight);
+        }
+
+        Vector3 separation = Separation();
+        if (separation.sqrMagnitude > 0.01f)
+            AddForce(separation * _separationWeight);
+
+        var avoid = Avoid.ChangeVelocity(_velocity);
+        if (avoid != _velocity)
+            AddForce((avoid - _velocity) * AvoidanceWeight * 2f);
     }
 
     public bool HasLineOfSight(Vector3 target)
     {
         Vector3 dir = target - transform.position;
-        float distance = dir.magnitude;
+        return !Physics.Raycast(transform.position, dir.normalized, dir.magnitude, _obstacleMask);
+    }
 
-        return !Physics.Raycast(transform.position, dir.normalized, distance, _obstacleMask);
+    Vector3 Separation()
+    {
+        Vector3 result = Vector3.zero;
+        int count = 0;
+
+        foreach (var s in FlockingManagerExamen.Instance.AllSolders)
+        {
+            if (s == this) continue;
+            if (s.Lider != this.Lider) continue;
+
+            Vector3 diff = transform.position - s.transform.position;
+
+            if (diff.sqrMagnitude < _separationRadius * _separationRadius)
+            {
+                result += diff.normalized / diff.magnitude;
+                count++;
+            }
+        }
+
+        if (count == 0) return Vector3.zero;
+
+        result /= count;
+        result = result.normalized * _maxSpeed;
+
+        return CalculateSteering(result);
     }
 
 
-    public void FollowWithTheta(Vector3 target)
+    public void MoveWithTheta(Vector3 target)
     {
-        // если прямая видимость — просто Seek
         if (HasLineOfSight(target))
         {
             AddForce(Seek(target));
-
-            Vector3 avoidance = Avoid.ChangeVelocity(_velocity);
-            if (avoidance != _velocity)
-                AddForce((avoidance - _velocity) * AvoidanceWeight);
-
-            _path = null;
-            _pathIndex = 0;
+            var avoidDir = Avoid.ChangeVelocity(_velocity);
+            if (avoidDir != _velocity)
+                AddForce((avoidDir - _velocity) * AvoidanceWeight * 2f);
             return;
         }
 
-        bool targetChanged = Vector3.Distance(_lastTarget, target) > 1f;
-        bool needsNewPath = _path == null || _pathIndex >= _path.Count || targetChanged;
+        bool newPathNeeded =
+            _path == null ||
+            _pathIndex >= _path.Count ||
+            Vector3.Distance(_lastTarget, target) > 1f;
 
-        if (needsNewPath)
+        if (newPathNeeded)
         {
             Graph start = PathManagerExamen.Instance.Closest(transform.position);
             Graph end = PathManagerExamen.Instance.Closest(target);
@@ -262,123 +346,100 @@ public class Solder : SteeringBase, IDamageable
                 _pathIndex = 0;
                 _lastTarget = target;
             }
+            else return;
+        }
+
+        if (_pathIndex >= _path.Count) return;
+
+        Vector3 node = _path[_pathIndex].transform.position;
+        float dist = Vector3.Distance(transform.position, node);
+
+        if (dist < 1.5f || _stuckTimer > 2f)
+        {
+            _pathIndex++;
+            _stuckTimer = 0;
+            return;
+        }
+
+        Vector3 directionToNode = (node - transform.position).normalized;
+        Vector3 desired = directionToNode * _maxSpeed;
+        AddForce(CalculateSteering(desired));
+
+        var avoidVel = Avoid.ChangeVelocity(_velocity);
+        if (avoidVel != _velocity)
+            AddForce((avoidVel - _velocity) * AvoidanceWeight * 2f);
+    }
+
+    public void Attack()
+    {
+        if (_currentTarget == null)
+        {
+            Debug.LogWarning($"{gameObject.name} пытается атаковать, но Target = null!");
+            return;
+        }
+
+        if (!_currentTarget.gameObject.activeInHierarchy)
+        {
+            Debug.Log($"{gameObject.name} цель деактивирована, очищаем");
+            _currentTarget = null;
+            return;
+        }
+
+        float dist = Vector3.Distance(transform.position, _currentTarget.position);
+
+        if (dist <= _attackRadius)
+        {
+            _velocity = Vector3.zero;
+            if (_attackTimer <= 0f)
+            {
+                var dmg = _currentTarget.GetComponent<IDamageable>();
+                if (dmg != null)
+                {
+                    string targetType = _currentTarget.GetComponent<Solder>() != null ? "солдат" : "лидер";
+                    dmg.TakeDamage(_damage);
+                    Debug.Log($"[АТАКА] {gameObject.name} атакует {targetType} {_currentTarget.name}, нанесено {_damage} урона. Расстояние: {dist:F2}, HP атакующего: {_currentHP:F1}");
+                }
+                else
+                {
+                    Debug.LogWarning($"{gameObject.name} не может нанести урон {_currentTarget.name} - нет IDamageable");
+                }
+                _attackTimer = _attackCooldown;
+            }
             else
             {
-                _velocity = Vector3.zero;
-                return;
+                // Таймер еще не готов
+                Debug.Log($"{gameObject.name} в радиусе атаки, но таймер: {_attackTimer:F2}");
             }
+            return;
         }
 
-        if (_path != null && _pathIndex < _path.Count)
-        {
-            Vector3 nodeTarget = _path[_pathIndex].transform.position;
-            float distanceToNode = Vector3.Distance(transform.position, nodeTarget);
+        // Движемся к врагу для атаки
+        MoveWithTheta(_currentTarget.position);
 
-            if (distanceToNode < 0.5f || _stuckTimer > 2f)
-            {
-                _pathIndex++;
-                _stuckTimer = 0f;
-            }
-
-            if (_pathIndex < _path.Count)
-            {
-                Vector3 desired = Seek(_path[_pathIndex].transform.position);
-                AddForce(desired);
-
-                Vector3 avoidance = Avoid.ChangeVelocity(_velocity);
-                if (avoidance != _velocity)
-                    AddForce((avoidance - _velocity) * AvoidanceWeight);
-            }
-        }
+        var avoid = Avoid.ChangeVelocity(_velocity);
+        if (avoid != _velocity)
+            AddForce((avoid - _velocity) * AvoidanceWeight * 2f);
     }
 
-    public void SetPath(List<Graph> path)
+    public Transform Target => _currentTarget;
+
+    public void ClearTarget() => _currentTarget = null;
+
+    public void TakeDamage(float dmg)
     {
-        _path = path;
-        _pathIndex = 0;
-        _lastTarget = Vector3.zero;
-    }
+        if (dmg <= 0f) return;
 
-    public void NextPathPoint() => _pathIndex++;
+        float oldHP = _currentHP;
+        _currentHP -= dmg;
+        _currentHP = Mathf.Max(0, _currentHP);
 
+        Debug.Log($"[УРОН] {gameObject.name} получил {dmg} урона. HP: {oldHP:F1} → {_currentHP:F1}/{_maxHealth}");
 
-    public void TakeDamage(float damage)
-    {
-        if (damage <= 0f) return;
-
-        _currentHealth -= damage;
-        _currentHealth = Mathf.Clamp(_currentHealth, 0, _maxHealth);
-
-        if (_currentHealth <= 0f)
+        if (_currentHP <= 0)
         {
-            _flockingManagerExamen.RemoveSolder(this);
-            gameObject.SetActive(false);
+            Debug.Log($"{gameObject.name} уничтожен!");
+            FlockingManagerExamen.Instance.RemoveSolder(this);
+            Destroy(gameObject);
         }
-    }
-
-
-    private void OnDrawGizmos()
-    {
-        if (_fsm != null && _fsm.CurrentState != null)
-        {
-            string stateName = _fsm.CurrentState.GetType().Name;
-
-            if (stateName.Contains("FollowLider") || stateName.Contains("FollowLeader"))
-                Gizmos.color = Color.blue;
-            else if (stateName.Contains("Persuit"))
-                Gizmos.color = Color.red;
-            else if (stateName.Contains("Escape") || stateName.Contains("Salvation"))
-                Gizmos.color = Color.yellow;
-            else
-                Gizmos.color = Color.white;
-
-            Gizmos.DrawWireSphere(transform.position + Vector3.up * 2.5f, 0.3f);
-        }
-
-        // FOV радиус
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, _viewRadius);
-
-        // Separation радиус
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, _separationRadius);
-
-        // радиус атаки
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawWireSphere(transform.position, _attackRadius);
-
-        // полоска HP
-        if (_currentHealth > 0)
-        {
-            float hpPercent = _currentHealth / _maxHealth;
-            Gizmos.color = hpPercent > 0.5f ? Color.green :
-                           hpPercent > 0.3f ? Color.yellow : Color.red;
-            Gizmos.DrawLine(transform.position,
-                            transform.position + Vector3.up * 2f * hpPercent);
-        }
-
-        // линия до врага
-        if (_currentEnemyTarget != null)
-        {
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawLine(transform.position, _currentEnemyTarget.position);
-        }
-
-        // путь
-        if (_path != null && _path.Count > 0)
-        {
-            Gizmos.color = Color.cyan;
-            for (int i = 0; i < _path.Count - 1; i++)
-            {
-                if (_path[i] != null && _path[i + 1] != null)
-                    Gizmos.DrawLine(_path[i].transform.position, _path[i + 1].transform.position);
-            }
-        }
-    }
-
-    private void OnDestroy()
-    {
-        if (_flockingManagerExamen != null)
-            _flockingManagerExamen.RemoveSolder(this);
     }
 }

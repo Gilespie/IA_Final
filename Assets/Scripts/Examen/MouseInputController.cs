@@ -7,6 +7,7 @@ public class MouseInputController
 
     LayerMask _mask;
     bool _hasClick = false;
+    bool _newClick = false;
     public bool HasClick => _hasClick;
 
     public MouseInputController(LayerMask mask)
@@ -16,7 +17,7 @@ public class MouseInputController
 
     public void InputUpdate()
     {
-        _hasClick = false;
+        _newClick = false;
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -26,7 +27,15 @@ public class MouseInputController
             {
                 _position = hit.point;
                 _hasClick = true;
+                _newClick = true;
             }
         }
     }
+
+    public void ClearClick()
+    {
+        _hasClick = false;
+    }
+
+    public bool HasNewClick => _newClick;
 }

@@ -1,26 +1,33 @@
-using UnityEngine;
-
 public class LiderIdle : State<NPCState>
 {
-    Lider _lider;
+    Lider _l;
 
     public LiderIdle(FSM<NPCState> fsm, Lider lider) : base(fsm)
     {
-        _lider = lider;
+        _l = lider;
     }
 
     public override void Execute()
     {
-        if (_lider.FindEnemyInFOV())
+        // Приоритет: низкое HP важнее всего
+        if (_l.IsLowHP)
         {
-            _fsm.ChangeState(NPCState.Persuit);
+            _fsm.ChangeState(NPCState.Salvation);
             return;
         }
 
-        if (_lider.Controller != null && _lider.Controller.HasClick)
+        // Приоритет: клик мыши важнее преследования врага
+        if (_l.Controller != null && _l.Controller.HasClick)
         {
-            _lider.SetPathToClick(_lider.ClickPosition);
+            _l.SetPathToClick(_l.ClickPosition);
             _fsm.ChangeState(NPCState.FollowToClick);
+            return;
+        }
+
+        if (_l.FindEnemyInFOV())
+        {
+            _fsm.ChangeState(NPCState.Persuit);
+            return;
         }
     }
 }

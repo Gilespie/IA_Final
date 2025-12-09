@@ -3,89 +3,67 @@ using UnityEngine;
 
 public class Graph : MonoBehaviour
 {
-    [SerializeField] List<Graph> _neighbors;
-    public List<Graph> Neighbors => _neighbors;
-
-    [SerializeField] LayerMask _obstacleMask;
-
-    private int _x, _y;
-    public int X => _x;
-    public int Y => _y;
-
     [SerializeField] private bool _isWall;
     public bool IsWall => _isWall;
 
-    [SerializeField] int _cost;
-    public int Cost => _cost;
+    [SerializeField] private LayerMask _obstacleMask;
 
-    Color _defaultColor;
+    public List<Graph> Neighbors { get; private set; } = new();
+
+    public int X { get; private set; }
+    public int Y { get; private set; }
+
+    private Color _defaultColor;
     public Color DefaultColor => _defaultColor;
 
-    MeshRenderer _meshRenderer;
+    private MeshRenderer _renderer;
 
     private void Awake()
     {
-        _meshRenderer = GetComponent<MeshRenderer>();
-        _defaultColor = _meshRenderer.material.color;
+        _renderer = GetComponent<MeshRenderer>();
+        if (_renderer != null)
+            _defaultColor = _renderer.material.color;
 
-        FindAllGraph();
-        ConnectNodes();
+        FindCoordinates();
+        BuildNeighbors();
     }
 
-    public void SetCost(int value)
+    private void FindCoordinates()
     {
-        _cost = value;
+        X = Mathf.RoundToInt(transform.position.x);
+        Y = Mathf.RoundToInt(transform.position.z);
     }
 
-    public void SetCoordinates(int x, int y)
+    private void BuildNeighbors()
     {
-        _x = x;
-        _y = y;
-    }
+        Graph[] all = FindObjectsOfType<Graph>();
 
-    public Color Color
-    {
-        set { GetComponent<MeshRenderer>().material.color = value; }
-    }
-
-    public void AddNeighbors(Graph neighbor)
-    {
-        _neighbors.Add(neighbor);
-    }
-
-    private void FindAllGraph()
-    {
-        Graph[] allGraphs = FindObjectsOfType<Graph>();
-        _neighbors = new List<Graph>();
-
-        foreach (Graph graph in allGraphs)
+        foreach (var node in all)
         {
-            if (graph == this) continue;
-            _neighbors.Add(graph);
+            if (node == this) continue;
+
+            if (!Physics.Linecast(transform.position, node.transform.position, _obstacleMask))
+            {
+                Neighbors.Add(node);
+            }
         }
     }
 
-    private void ConnectNodes()
+    public void SetColor(Color c)
     {
-        for (int i = _neighbors.Count - 1; i >= 0; i--)
-        {
-            if (Physics.Linecast(transform.position, _neighbors[i].transform.position, _obstacleMask))
-                _neighbors.RemoveAt(i);
-        }
+        if (_renderer != null)
+            _renderer.material.color = c;
     }
 
     private void OnDrawGizmos()
     {
         Gizmos.color = _isWall ? Color.red : Color.cyan;
 
-        if (_neighbors == null) return;
-
-        foreach (var neighbor in _neighbors)
+        foreach (var n in Neighbors)
         {
-            if (neighbor == null) continue;
+            if (n == null) continue;
 
-            if (!Physics.Linecast(transform.position, neighbor.transform.position, _obstacleMask))
-                Gizmos.DrawLine(transform.position, neighbor.transform.position);
+            Gizmos.DrawLine(transform.position, n.transform.position);
         }
     }
 }

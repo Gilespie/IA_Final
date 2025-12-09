@@ -1,36 +1,53 @@
 using UnityEngine;
 
-public class SolderPersuit : State<NPCState>
+public class SolderPursuit : State<NPCState>
 {
-    Solder _solder;
+    Solder _s;
 
-    public SolderPersuit(FSM<NPCState> fsm, Solder solder) : base(fsm)
+    public SolderPursuit(FSM<NPCState> fsm, Solder s) : base(fsm)
     {
-        _solder = solder;
+        _s = s;
+    }
+
+    public override void Enter()
+    {
+        if (_s.Target == null)
+        {
+            _s.CheckEnemyInFOV();
+        }
     }
 
     public override void Execute()
     {
-        if (_solder.IsLowHealth)
+        // Приоритет: низкое HP важнее всего
+        if (_s.IsLowHP)
         {
-            _solder.ClearEnemyTarget();
+            Debug.Log($"{_s.gameObject.name} HP низкое ({_s.CurrentHP:F1}) во время преследования, убегает!");
+            _s.ClearTarget();
             _fsm.ChangeState(NPCState.Salvation);
             return;
         }
 
-        if (!_solder.CheckEnemyInFOV() || _solder.CurrentEnemyTarget == null)
+        // Проверяем врага в FOV
+        if (!_s.CheckEnemyInFOV())
         {
-            _solder.ClearEnemyTarget();
+            _s.ClearTarget();
             _fsm.ChangeState(NPCState.FollowToClick);
             return;
         }
 
-        _solder.Attack();
-
-        Vector3 avoidance = _solder.Avoid.ChangeVelocity(_solder.Velocity);
-        if (avoidance != _solder.Velocity)
+        // Проверяем что цель все еще существует
+        if (_s.Target == null)
         {
-            _solder.AddForce((avoidance - _solder.Velocity) * _solder.AvoidanceWeight);
+            _fsm.ChangeState(NPCState.FollowToClick);
+            return;
         }
+
+        // Атакуем врага (тот кто атакует - наносит урон)
+        _s.Attack();
+
+        var avoid = _s.Avoid.ChangeVelocity(_s.Velocity);
+        if (avoid != _s.Velocity)
+            _s.AddForce((avoid - _s.Velocity) * _s.AvoidanceWeight);
     }
 }

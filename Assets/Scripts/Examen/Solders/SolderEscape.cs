@@ -20,23 +20,33 @@ public class SolderEscape : State<NPCState>
 
     public override void Execute()
     {
-        if (!_solder.IsLowHealth)
+        // Восстанавливаем HP
+        _solder.RecoverHealth(Time.deltaTime);
+
+        // Если HP восстановилось, возвращаемся к нормальному поведению
+        if (!_solder.IsLowHP)
         {
+            Debug.Log($"{_solder.gameObject.name} HP восстановилось, возвращается к лидеру");
             _fsm.ChangeState(NPCState.FollowToClick);
             return;
         }
 
-        if (_solder.CheckEnemyInFOV() && _solder.CurrentEnemyTarget != null)
+        // Если видим врага, убегаем от него
+        if (_solder.CheckEnemyInFOV() && _solder.Target != null)
         {
-            Vector3 fleeDirection = (_solder.transform.position - _solder.CurrentEnemyTarget.position).normalized;
-            Vector3 fleeTarget = _solder.transform.position + fleeDirection * 10f;
-            _solder.FollowWithTheta(fleeTarget);
+            Vector3 dir = (_solder.transform.position - _solder.Target.position).normalized;
+            Vector3 fleeTarget = _solder.transform.position + dir * 15f;
+            fleeTarget.y = _solder.transform.position.y;
+
+            Debug.Log($"{_solder.gameObject.name} убегает от врага {_solder.Target.name}");
+            _solder.MoveWithTheta(fleeTarget);
             return;
         }
 
+        // Движемся к безопасной позиции
         if (Vector3.Distance(_solder.transform.position, _safePosition) > 2f)
         {
-            _solder.FollowWithTheta(_safePosition);
+            _solder.MoveWithTheta(_safePosition);
         }
         else
         {
@@ -44,9 +54,10 @@ public class SolderEscape : State<NPCState>
         }
 
         _escapeTimer += Time.deltaTime;
+
         if (_escapeTimer > _escapeDuration)
         {
-            if (!_solder.IsLowHealth)
+            if (!_solder.IsLowHP)
             {
                 _fsm.ChangeState(NPCState.FollowToClick);
             }
@@ -58,8 +69,9 @@ public class SolderEscape : State<NPCState>
         if (_solder.Lider != null)
         {
             Vector3 leaderPos = _solder.Lider.transform.position;
-            Vector3 direction = (leaderPos - _solder.transform.position).normalized;
-            _safePosition = _solder.transform.position + direction * 5f;
+            Vector3 dir = (leaderPos - _solder.transform.position).normalized;
+
+            _safePosition = _solder.transform.position + dir * 5f;
         }
         else
         {

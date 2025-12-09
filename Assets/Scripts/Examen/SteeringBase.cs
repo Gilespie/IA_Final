@@ -2,16 +2,18 @@ using UnityEngine;
 
 public class SteeringBase : MonoBehaviour
 {
-    [Header("Steering")]
-    [SerializeField] protected float _maxSpeed;
-    [SerializeField] protected float _maxForce;
-    [SerializeField] protected float _slowingRange = 3f;
-    [SerializeField] protected float _timePrediction = 3f;
+    [Header("Movement")]
+    [SerializeField] protected float _maxSpeed = 4f;
+    [SerializeField] protected float _maxForce = 10f;
 
-    [SerializeField] protected float _rotationForce;
-    [SerializeField] protected float _radius;
-    [SerializeField] protected float _personalArea;
-    [SerializeField] protected float _avoidanceWeight;
+    [Header("Arrive")]
+    [SerializeField] protected float _slowingRange = 3f;
+    [SerializeField] protected float _rotationForce = 5f;
+
+    [Header("Obstacle Avoidance")]
+    [SerializeField] protected float _radius = 1f;
+    [SerializeField] protected float _personalArea = 1f;
+    [SerializeField] protected float _avoidanceWeight = 1f;
     [SerializeField] protected LayerMask _obstacleMask;
 
     protected Vector3 _velocity;
@@ -30,28 +32,26 @@ public class SteeringBase : MonoBehaviour
     {
         if (_velocity.sqrMagnitude > 0.0001f)
         {
-            transform.position += _velocity * Time.deltaTime;
             transform.forward = _velocity.normalized;
+            transform.position += _velocity * Time.deltaTime;
         }
     }
 
     protected Vector3 Seek(Vector3 target)
     {
-        Vector3 desired = target - transform.position;
-        desired = desired.normalized * _maxSpeed;
+        Vector3 desired = (target - transform.position).normalized * _maxSpeed;
         return CalculateSteering(desired);
     }
 
     public Vector3 Arrive(Transform target, Vector3 velocity)
     {
-        Vector3 offsetToTarget = (target.position - transform.position).NoY();
-        float distance = offsetToTarget.magnitude;
-        float rampedSpeed = _maxSpeed * (distance / _slowingRange);
-        rampedSpeed = Mathf.Min(rampedSpeed, _maxSpeed);
+        Vector3 offset = (target.position - transform.position).NoY();
+        float dist = offset.magnitude;
 
-        Vector3 directionToTarget = offsetToTarget.normalized;
+        float speed = _maxSpeed * (dist / _slowingRange);
+        speed = Mathf.Min(speed, _maxSpeed);
 
-        Vector3 desiredVelocity = directionToTarget * rampedSpeed;
+        Vector3 desiredVelocity = offset.normalized * speed;
         Vector3 steering = desiredVelocity - velocity;
 
         velocity += steering * Time.deltaTime * _rotationForce;
@@ -61,11 +61,10 @@ public class SteeringBase : MonoBehaviour
 
     public Vector3 Evade(Transform target, Vector3 velocity)
     {
-        Vector3 directionToTarget = (transform.position - target.position).NoY().normalized;
+        Vector3 dir = (transform.position - target.position).NoY();
+        Vector3 desired = dir.normalized * _maxSpeed;
 
-        Vector3 desiredVelocity = directionToTarget * _maxSpeed;
-        Vector3 steering = desiredVelocity - velocity;
-
+        Vector3 steering = desired - velocity;
         velocity += steering * Time.deltaTime * _rotationForce;
 
         return velocity;
@@ -82,11 +81,8 @@ public class SteeringBase : MonoBehaviour
         _velocity = Vector3.ClampMagnitude(_velocity + force, _maxSpeed);
     }
 
-    // public void Move()
-    // {
-    //     if (_velocity.sqrMagnitude < 0.0001f) return;
-
-    //     transform.forward = _velocity.normalized;
-    //     transform.position += _velocity * Time.deltaTime;
-    // }
+    public void Stop()
+    {
+        _velocity = Vector3.zero;
+    }
 }
