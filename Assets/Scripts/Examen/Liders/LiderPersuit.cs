@@ -3,6 +3,9 @@ using UnityEngine;
 public class LiderPersuit : State<NPCState>
 {
     Lider _lider;
+    float _damage = 20f;
+    float _attackRadius = 1.5f;
+    float _attackTimer = 1f;
 
     public LiderPersuit(FSM<NPCState> fsm, Lider lider) : base(fsm)
     {
@@ -11,27 +14,36 @@ public class LiderPersuit : State<NPCState>
 
     public override void Execute()
     {
-        if (!_lider.FOVV.InFOV(_lider.EnemyTarget.position))
+        if (!_lider.EnemyInFOV())
         {
-            if (_lider.HasPath)
-                _fsm.ChangeState(NPCState.FollowToClick);
-            else
-                _fsm.ChangeState(NPCState.Idle);
-
+            _fsm.ChangeState(NPCState.Idle);
             return;
         }
 
-        float dist = Vector3.Distance(
-            _lider.transform.position,
-            _lider.EnemyTarget.position
-        );
+        float distance = (_lider.EnemyTarget.position - _lider.transform.position).sqrMagnitude;
 
-        if (dist <= _lider.AttackRadius)
+        if (distance >= _attackRadius * _attackRadius)
         {
-
-            return;
+            Debug.Log("Persuit");
+            _lider.PersuitTarget();
         }
+        else
+        {
+            _attackTimer -= Time.deltaTime;
 
-        
+            if (_attackTimer <= 0)
+            {
+                if(_lider.EnemyTarget.TryGetComponent<IDamageable>(out IDamageable dmgable))
+
+                dmgable.TakeDamage(_damage);
+
+                _attackTimer = 1f;
+
+                if (dmgable.CurrentHealth <= 0f)
+                {
+                    _fsm.ChangeState(NPCState.Idle);
+                }
+            }
+        }
     }
 }

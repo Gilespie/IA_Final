@@ -15,7 +15,7 @@ public class ObstacleAvoidance : ISteering
         _obstacleMask = obstacleMask;
     }
 
-    public Vector3 ChangeVelocity(Vector3 velocity)
+    /*public Vector3 ChangeVelocity(Vector3 velocity)
     {
         if(Physics.SphereCast(_npc.position, _personalArea, velocity.normalized, out RaycastHit hit, _radius, _obstacleMask))
         {
@@ -44,5 +44,40 @@ public class ObstacleAvoidance : ISteering
 
         return velocity;
         
+    }*/
+
+    public Vector3 ChangeVelocity(Vector3 desiredVelocity)
+    {
+
+        if (desiredVelocity.sqrMagnitude < 0.0001f)
+            return Vector3.zero;
+
+        Vector3 dir = desiredVelocity.normalized;
+
+        if (Physics.SphereCast(
+            _npc.position,
+            _personalArea,
+            dir,
+            out RaycastHit hit,
+            _radius,
+            _obstacleMask))
+        {
+
+            Vector3 localHit = _npc.InverseTransformPoint(hit.point);
+
+
+            Vector3 steerDir = (localHit.x < 0)
+                ? Vector3.Cross(_npc.up, dir)      
+                : -Vector3.Cross(_npc.up, dir);   
+
+
+            float strength = 1f - (hit.distance / _radius);
+            strength = Mathf.Clamp01(strength);
+
+
+            return steerDir.normalized * strength;
+        }
+
+        return Vector3.zero;
     }
 }

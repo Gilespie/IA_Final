@@ -45,7 +45,7 @@ public class Boid : SteeringBase
 
             if (foodCount > 0)
             {
-                AddForce(Arrive(_apples[0].transform, _velocity));
+                AddForce(Arrive(_apples[0].transform.position));
                 Debug.Log("Busco la comida");
                 float distanceBetweenBoidAndApple = (_apples[0].transform.position - transform.position).magnitude;
 

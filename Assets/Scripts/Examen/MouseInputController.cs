@@ -27,4 +27,9 @@ public class MouseInputController
             }
         }
     }
+
+    public void ResetClick()
+    {
+        _hasClick = false;
+    }
 }

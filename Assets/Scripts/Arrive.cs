@@ -3,11 +3,11 @@ using UnityEngine;
 public class Arrive : ISteering
 {
     private Transform _character;
-    private Transform _target;
+    private Vector3 _target;
     private float _maxSpeed;
     private float _slowingRange;
 
-    public Arrive(Transform character, Transform target, float maxSpeed, float slowingRange)
+    public Arrive(Transform character, Vector3 target, float maxSpeed, float slowingRange)
     {
         _character = character;
         _target = target;
@@ -17,7 +17,7 @@ public class Arrive : ISteering
 
     public Vector3 ChangeVelocity(Vector3 velocity)
     {
-        Vector3 offsetToTarget = (_target.position - _character.position).NoY();
+        Vector3 offsetToTarget = (_target - _character.position).NoY();
         float distance = offsetToTarget.magnitude;
         float rampedSpeed = _maxSpeed * (distance/_slowingRange);
         rampedSpeed = Mathf.Min(rampedSpeed, _maxSpeed);

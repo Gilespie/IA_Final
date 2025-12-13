@@ -233,11 +233,6 @@ public class Guardian : MonoBehaviour
         _fsm.OnUpdate();
     }
 
-    void FixedUpdate()
-    {
-        _fsm.OnFixedUpdate();
-    }
-
     public void SetTarget(Transform target)
     {
         _target = target;

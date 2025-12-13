@@ -1,164 +1,223 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Solder : SteeringBase
 {
+    FSM<NPCState> _fsm;
+    public FSM<NPCState> FSM => _fsm;
+
     [SerializeField] Lider _lider;
+    public Lider Lider => _lider;
+
+    [SerializeField] HealthSystem _healthSystem;
 
     [Header("FOV")]
-    [SerializeField] float _viewRadius = 6f;
-    [SerializeField] float _viewAngle = 90f;
+    [SerializeField] FOV _fov;
+    public FOV Fovv => _fov;
 
     [Header("Movement")]
     [SerializeField] float _separationRadius = 1.5f;
-    [SerializeField] float _arriveRadius = 2f;
+    [SerializeField] float _persuitSpeed = 3f;
+
+    [Header("Save place")]
+    [SerializeField] Transform _saveNode;
+    public Transform SaveNode => _saveNode;
 
     [Header("Weights")]
     [SerializeField, Range(0, 3)] float _separationWeight = 1.5f;
-    [SerializeField, Range(0, 3)] float _arriveWeight = 1f;
 
     [Header("Layers")]
     [SerializeField] LayerMask _enemyMask;
-    [SerializeField] LayerMask _obstacleMask;
+    public LayerMask ObstacleMask => _obstacleMask;
 
     FlockingManagerExamen _flockingManagerExamen => FlockingManagerExamen.Instance;
+    public Graph CurrentNode => PathManagerExamen.Instance.Closest(transform.position);
+    Transform _enemy;
+    public Transform EnemyTarget => _enemy;
 
-    Transform _currentEnemyTarget;
-
-    List<Graph> _path;
-    int _pathIndex;
 
     void Start()
     {
         _flockingManagerExamen.AddSolder(this);
+        SetFSM();
     }
 
-    void Update()
+    void SetFSM()
     {
-        if (CheckEnemyInFOV())
-        {
-            Attack();
-            return;
-        }
+        _fsm = new FSM<NPCState>();
 
-        FollowLeader();
+        var followToLider = new SoldersFollowLider(_fsm, this, _lider);
+        var escape = new SolderEscape(_fsm, this, _saveNode);
+        var persuit = new SolderPersuit(_fsm, this, _healthSystem);
+        var followToliderByPath = new SolderFollowToLiderByPath(_fsm, this);
 
-        AddForce(_avoid.ChangeVelocity(_velocity) * _avoidanceWeight);
-        Move();
+        followToLider.AddTransition(NPCState.Escape, escape);
+        followToLider.AddTransition(NPCState.Persuit, persuit);
+        followToLider.AddTransition(NPCState.FollowToLiderByPath, followToliderByPath);
+
+        escape.AddTransition(NPCState.Persuit, persuit);
+        escape.AddTransition(NPCState.FollowToLider, followToLider);
+        escape.AddTransition(NPCState.FollowToLiderByPath, followToliderByPath);
+
+        persuit.AddTransition(NPCState.FollowToLider, followToLider);
+        persuit.AddTransition(NPCState.Escape, escape);
+        persuit.AddTransition(NPCState.FollowToLiderByPath, followToliderByPath);
+
+        _fsm.SetInnitialFSM(followToLider);
     }
 
-    // ✅ 1. FoV + Attack
-    bool CheckEnemyInFOV()
+    private void Update()
     {
-        Collider[] enemies = Physics.OverlapSphere(transform.position, _viewRadius, _enemyMask);
+        _fsm.OnUpdate();
+    }
 
-        foreach (var enemy in enemies)
+    void OnDisable()
+    {
+        if (_flockingManagerExamen != null)
+            _flockingManagerExamen.RemoveSolder(this);
+    }
+
+    public void ClearEnemyTarget()
+    {
+        _enemy = null;
+    }
+
+    public void CheckEnemyInFOV()
+    {
+        Collider[] hits = Physics.OverlapSphere(transform.position, _fov.VisionRange, _enemyMask);
+
+        Transform best = null;
+        float bestDist = float.MaxValue;
+
+        foreach (var hit in hits)
         {
-            Vector3 dir = (enemy.transform.position - transform.position).normalized;
+            Vector3 pos = hit.transform.position;
 
-            if (Vector3.Angle(transform.forward, dir) < _viewAngle / 2)
+            if (!_fov.InAngle(pos)) continue;
+            if (!_fov.InSight(pos)) continue;
+
+            float dist = (pos - transform.position).sqrMagnitude;
+
+            if (dist <= bestDist * bestDist)
             {
-                if (!Physics.Raycast(transform.position, dir,
-                    Vector3.Distance(transform.position, enemy.transform.position),
-                    _obstacleMask))
-                {
-                    _currentEnemyTarget = enemy.transform;
-                    return true;
-                }
+                bestDist = dist;
+                best = hit.transform;
             }
         }
 
-        _currentEnemyTarget = null;
-        return false;
+        _enemy = best;
     }
 
-    void Attack()
+    public void FollowLeader()
     {
-        AddForce(Seek(_currentEnemyTarget.position));
+        Vector3 toLeader = _lider.transform.position - transform.position;
+        float dist = toLeader.magnitude;
+
+        Vector3 force = Separation() * _separationWeight;
+
+        if (dist > _slowingRange)
+            force += Seek(_lider.transform.position);
+        else
+            force += Arrive(_lider.transform.position);
+
+        AddForce(force);
+        Move();
     }
 
-    // ✅ 2. Leader Following (Arrive + Separation)
-    void FollowLeader()
+    public bool EnemyInFOV()
     {
-        Vector3 arrive = Arrive(_lider.transform, _velocity);
-        Vector3 separation = Separation();
-
-        AddForce(arrive * _arriveWeight + separation * _separationWeight);
+        return _enemy != null && _fov.InFOV(_enemy.position);
     }
 
-    Vector3 Separation()
+    private Vector3 Separation()
     {
         Vector3 desired = Vector3.zero;
+
         int count = 0;
 
-        foreach (var boid in _flockingManagerExamen.AllSolders)
+        for (int i = 0; i < _flockingManagerExamen.AllSolders.Count; i++)
         {
-            if (boid == this) continue;
+            Solder current = _flockingManagerExamen.AllSolders[i];
 
-            Vector3 dir = transform.position - boid.transform.position;
+            if (current == this) continue;
+
+            Vector3 dir = current.transform.position - transform.position;
 
             if (dir.sqrMagnitude > _separationRadius * _separationRadius) continue;
 
             count++;
-            desired += dir.normalized / dir.magnitude;
+
+            desired += dir;
         }
 
-        if (count == 0) return Vector3.zero;
+        if (count == 0) return desired;
 
         desired /= count;
-        desired = desired.normalized * _maxSpeed;
+        desired *= -1;
 
-        return CalculateSteering(desired);
+        return CalculateSteering(desired.normalized * _maxSpeed);
     }
 
-    // ✅ 3. LOS + THETA*
-    bool HasLineOfSight(Vector3 target)
+    public bool LeaderInSight()
     {
-        Vector3 dir = target - transform.position;
+        if (_lider == null) return false;
 
-        return !Physics.Raycast(transform.position, dir.normalized,
-            dir.magnitude, _obstacleMask);
+        Vector3 origin = transform.position;
+        Vector3 target = _lider.transform.position;
+        Vector3 dir = target - origin;
+        float dist = dir.magnitude;
+
+        if (!Physics.Raycast(origin, dir.normalized, dist, ObstacleMask))
+            return true;
+
+        return false;
     }
 
-    void FollowWithTheta(Vector3 target)
+    public void PersuitTarget()
     {
-        if (HasLineOfSight(target))
-        {
-            AddForce(Seek(target));
-            return;
-        }
+        if (_enemy == null) return;
 
-        if (_path == null || _pathIndex >= _path.Count)
-        {
-            Graph start = PathManagerExamen.Instance.Closest(transform.position);
-            Graph end = PathManagerExamen.Instance.Closest(target);
-
-            _path = PathManagerExamen.Instance.GetPath(
-                start.transform.position,
-                end.transform.position); // Theta*
-            _pathIndex = 0;
-        }
-
-        Vector3 nodeTarget = _path[_pathIndex].transform.position;
-
-        if (Vector3.Distance(transform.position, nodeTarget) < 0.5f)
-            _pathIndex++;
-
-        AddForce(Seek(nodeTarget));
+        AddForce(Seek(_enemy.position) * _persuitSpeed);
+        Move();
     }
 
     void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, _viewRadius);
+        Gizmos.DrawWireSphere(transform.position, _fov.VisionRange);
 
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, _separationRadius);
-    }
 
-    void OnDestroy()
-    {
-        if (_flockingManagerExamen != null)
-            _flockingManagerExamen.RemoveSolder(this);
+            if (_lider == null) return;
+
+            Vector3 origin = transform.position;
+            Vector3 target = _lider.transform.position;
+            Vector3 dir = target - origin;
+            float dist = dir.magnitude;
+
+            RaycastHit hit;
+            bool blocked = Physics.Raycast(
+                origin,
+                dir.normalized,
+                out hit,
+                dist,
+                ObstacleMask
+            );
+
+            // Линия луча
+            Gizmos.color = blocked ? Color.red : Color.green;
+            Gizmos.DrawLine(origin, target);
+
+            // Точка попадания
+            if (blocked)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireSphere(hit.point, 0.15f);
+            }
+
+            // Точка лидера
+            Gizmos.color = Color.blue;
+            Gizmos.DrawWireSphere(target, 0.2f);
+        
     }
 }

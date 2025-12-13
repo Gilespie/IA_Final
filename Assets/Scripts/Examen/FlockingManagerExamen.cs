@@ -14,12 +14,6 @@ public class FlockingManagerExamen : MonoBehaviour
         if (!Instance)
         {
             Instance = this;
-
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
         }
     }
 

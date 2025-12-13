@@ -1,9 +1,12 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
-public class Lider : SteeringBase, IDamageable
+public class Lider : SteeringBase
 {
+    [SerializeField] bool _isControlable = true;
+    public bool IsControlable => _isControlable;
+
     FSM<NPCState> _fsm;
     public FSM<NPCState> FSM => _fsm;
 
@@ -18,43 +21,30 @@ public class Lider : SteeringBase, IDamageable
     MouseInputController _controller;
     public MouseInputController Controller => _controller;
 
-    [Header("Health")]
-    [SerializeField] float _maxHealth = 100f;
-    float _currentHealth;
-    public float CurrentHealth => _currentHealth;
-
     [Header("Movement")]
-    [SerializeField] float _moveSpeed = 1f;
-    public float MovSpeed => _moveSpeed;
     [SerializeField] float _persuitSpeed = 3f;
     public float PersuitSpeed => _persuitSpeed;
-    [SerializeField] float _distanceStopOffset = 0.3f;
 
-    [Header("Attack")]
-    [SerializeField] float _damage = 50f;
-    public float Damage => _damage;
+    [SerializeField] LayerMask _enemyMask;
 
-    [SerializeField] float _attackRadius = 1.5f;
-    public float AttackRadius => _attackRadius;
-
-
-    [Header("Path")]
     List<Graph> _path = new List<Graph>();
     public List<Graph> Path => _path;
-
     int _pathIndex;
+    public int PathIndex => _pathIndex;
+
+    public Graph CurrentNode => PathManagerExamen.Instance.Closest(transform.position);
 
     [SerializeField] LayerMask _groundMask;
 
     protected override void Awake()
     {
         base.Awake();
-        _controller = new MouseInputController(_groundMask);
+
+        if(_isControlable) _controller = new MouseInputController(_groundMask);
     }
 
     void Start()
     {
-        _currentHealth = _maxHealth;
         SetFSM();
     }
 
@@ -75,86 +65,27 @@ public class Lider : SteeringBase, IDamageable
         persuit.AddTransition(NPCState.Idle, idle);
         persuit.AddTransition(NPCState.FollowToClick, followToClick);
 
+
         _fsm.SetInnitialFSM(idle);
     }
 
-    protected override void Update()
+    private void Update()
     {
-        base.Update();
-        _controller.InputUpdate();
+        if(_isControlable)
+        {
+            _controller.InputUpdate();
 
-        if(_controller.HasClick)
-        ClickPosition = _controller.Position;
+            if (_controller.HasClick)
+                ClickPosition = _controller.Position;
+        }
 
         _fsm.OnUpdate();
     }
 
-    void FixedUpdate()
+    public void WalkRandom()
     {
-        _fsm.OnFixedUpdate();
-    }
-
-    public void SetPath(List<Graph> path)
-    {
-        _path = path;
-        _pathIndex = 0;
-    }
-
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, _attackRadius);
-    }
-
-    public void TakeDamage(float damage)
-    {
-        if (damage <= 0f) return;
-
-        _currentHealth -= damage;
-
-        if (_currentHealth <= 0f)
-        {
-            gameObject.SetActive(false);
-        }
-    }
-
-    public bool HasPath => _path != null && _pathIndex < _path.Count;
-
-    public Vector3 CurrentPathPoint => _path[_pathIndex].transform.position;
-
-    public void NextPathPoint() => _pathIndex++;
-
-    public void SetPathToClick(Vector3 pos)
-    {
-        Graph start = PathManagerExamen.Instance.Closest(transform.position);
-        Graph end = PathManagerExamen.Instance.Closest(pos);
-
-        var path = PathManagerExamen.Instance.GetPath(
-            start.transform.position,
-            end.transform.position
-        );
-
-        SetPath(path);
-    }
-
-    public bool MoveByPath(float speed)
-    {
-        if (_path == null || _path.Count == 0) return false;
-        if (_pathIndex >= _path.Count) return false;
-
-        Vector3 nodeTarget = _path[_pathIndex].transform.position;
-        Vector3 dir = nodeTarget - transform.position;
-
-        if (dir.sqrMagnitude < _distanceStopOffset * _distanceStopOffset)
-        {
-            _pathIndex++;
-            return _pathIndex < _path.Count;
-        }
-
-        AddForce(Seek(nodeTarget) * speed);
+        AddForce(Wander());
         Move();
-
-        return true;
     }
 
     public void PersuitTarget()
@@ -163,5 +94,56 @@ public class Lider : SteeringBase, IDamageable
 
         AddForce(Seek(_enemyTarget.position) * _persuitSpeed);
         Move();
+    }
+
+    public void ClearClick()
+    {
+        _path.Clear();
+        _pathIndex = 0;
+    }
+
+    public void SetPath(List<Graph> path)
+    { 
+        _path = path;
+        _pathIndex = 0;
+    }
+
+    public void NextPooint() => _pathIndex++;
+
+    public bool EnemyInFOV()
+    {
+        return _enemyTarget != null && _fov.InFOV(_enemyTarget.position);
+    }
+
+    public void FindTargetInFOV()
+    {
+        Collider[] hits = Physics.OverlapSphere(transform.position, _fov.VisionRange, _enemyMask);
+
+        Transform best = null;
+        float bestDist = float.MaxValue;
+
+        foreach (var hit in hits)
+        {
+            Vector3 pos = hit.transform.position;
+
+            if (!_fov.InAngle(pos)) continue;
+            if (!_fov.InSight(pos)) continue;
+
+            float dist = (pos - transform.position).sqrMagnitude;
+
+            if (dist <= bestDist * bestDist)
+            {
+                bestDist = dist;
+                best = hit.transform;
+            }
+        }
+
+        _enemyTarget = best;
+    }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, 1.5f);
     }
 }

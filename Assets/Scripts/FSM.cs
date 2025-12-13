@@ -10,7 +10,7 @@ public class FSM<T>
 
     public void OnUpdate() => _currentState.Execute();
 
-    public void OnFixedUpdate() => _currentState.FixedExecute();
+    //public void OnFixedUpdate() => _currentState.FixedExecute();
 
 
     public void ChangeState(T input)

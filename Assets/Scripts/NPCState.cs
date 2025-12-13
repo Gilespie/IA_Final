@@ -6,5 +6,7 @@ public enum NPCState
     Persuit,
     GoLastTargetPoint,
     FollowToClick,
-    Salvation,
+    Escape,
+    FollowToLider,
+    FollowToLiderByPath
 }

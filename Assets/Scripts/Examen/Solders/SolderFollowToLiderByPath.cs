@@ -1,27 +1,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SolderEscape : State<NPCState>
+public class SolderFollowToLiderByPath : State<NPCState>
 {
     Solder _solder;
     List<Graph> _path = new List<Graph>();
     int _pathIndex = 0;
     float _stopDistance = 1f;
-    float _speed = 5f;
-    Transform _savePlace;
 
-    public SolderEscape(FSM<NPCState> fsm, Solder solder, Transform savePlace) : base(fsm)
+    public SolderFollowToLiderByPath(FSM<NPCState> fsm, Solder solder) : base(fsm)
     {
         _solder = solder;
-        _savePlace = savePlace;
     }
 
     public override void Enter()
     {
+        if (_solder.Lider == null)
+        {
+            _fsm.ChangeState(NPCState.Escape);
+            return;
+        }
+
         _pathIndex = 0;
 
         var start = PathManagerExamen.Instance.Closest(_solder.transform.position);
-        var end = PathManagerExamen.Instance.Closest(_savePlace.position);
+        var end = PathManagerExamen.Instance.Closest(_solder.Lider.transform.position);
 
         if (start == null || end == null)
         {
@@ -58,14 +61,22 @@ public class SolderEscape : State<NPCState>
             return;
         }
 
-        Vector3 dir = _path[_pathIndex].transform.position - _solder.transform.position;
+        if (_solder.LeaderInSight())
+        {
+            _fsm.ChangeState(NPCState.FollowToLider);
+            return;
+        }
+
+        Vector3 targetPos = _path[_pathIndex].transform.position;
+        Vector3 dir = targetPos - _solder.transform.position;
 
         if (dir.sqrMagnitude <= _stopDistance * _stopDistance)
         {
             _pathIndex++;
+            return;
         }
 
-        _solder.transform.position += dir.normalized * _speed * Time.deltaTime;
-        _solder.transform.forward = dir;
+        _solder.AddForce(_solder.Seek(targetPos));
+        _solder.Move();
     }
 }

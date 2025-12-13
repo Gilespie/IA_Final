@@ -63,11 +63,6 @@ public class Hunter : MonoBehaviour
         _fsm.OnUpdate();
     }
 
-    private void FixedUpdate()
-    {
-        _fsm.OnFixedUpdate();
-    }
-
     public void OnWaypointArrive()
     {
         _currentWaypoint = _currentWaypoint >= _waypoints.Length - 1 ? 0 : _currentWaypoint + 1;

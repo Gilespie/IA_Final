@@ -4,7 +4,9 @@ public class FOV : MonoBehaviour
 {
     [SerializeField] float _angleRange;
     [SerializeField] float _visionRange;
-    [SerializeField] LayerMask _layerMask;
+    public float VisionRange => _visionRange;
+
+    [SerializeField] LayerMask _obstacleMask;
 
     public bool InFOV(Vector3 pos)
     {
@@ -26,7 +28,7 @@ public class FOV : MonoBehaviour
 
     public bool InSight(Vector3 pos)
     {
-        return !Physics.Linecast(transform.position, pos, _layerMask);
+        return !Physics.Linecast(transform.position, pos, _obstacleMask);
     }
 
     private Vector3 GetVectorFromAngle(float angle)

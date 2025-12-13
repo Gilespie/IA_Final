@@ -8,6 +8,8 @@ public class Graph : MonoBehaviour
 
     [SerializeField] LayerMask _obstacleMask;
 
+    [SerializeField] float _connectRadius = 10f;
+
     private int _x, _y;
 
     public int X => _x;
@@ -26,8 +28,10 @@ public class Graph : MonoBehaviour
         _meshRenderer = GetComponent<MeshRenderer>();
         _defaultColor = _meshRenderer.material.color;
 
-        FindAllGraph();
-        ConnectNodes();
+        //FindAllGraph();
+        //ConnectNodes();
+
+        FindAndConnectNeighbors();
     }
 
     public void SetCost(int value)
@@ -50,36 +54,39 @@ public class Graph : MonoBehaviour
         _neighbors.Add(neighbor);
     }
 
-    private void FindAllGraph()
+    private void FindAndConnectNeighbors()
     {
-        Graph[] allGraphs = FindObjectsOfType<Graph>();
         _neighbors = new List<Graph>();
 
-        foreach (Graph graph in allGraphs)
-        {
-            if (graph == this) continue;
-            _neighbors.Add(graph);
-        }
-    }
+        Collider[] hits = Physics.OverlapSphere(transform.position, _connectRadius);
 
-    private void ConnectNodes()
-    {
-        for (int i = _neighbors.Count - 1; i >= 0; i--)
+        foreach (var hit in hits)
         {
-            if (Physics.Linecast(transform.position, _neighbors[i].transform.position, _obstacleMask)) _neighbors.RemoveAt(i);
+            Graph neighbor = hit.GetComponent<Graph>();
+            if (neighbor == null || neighbor == this) continue;
+            if (neighbor.IsWall) continue;
+
+            if (!Physics.Linecast(transform.position, neighbor.transform.position, _obstacleMask))
+            {
+                _neighbors.Add(neighbor);
+            }
         }
     }
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = _isWall ? Color.red : Color.cyan;
+        Gizmos.color = Color.white * 0.3f;
+        Gizmos.DrawWireSphere(transform.position, _connectRadius);
+
+        Gizmos.color = _isWall ? Color.red * 0.3f : Color.cyan * 0.3f;
+
+        if (_neighbors == null) return;
 
         foreach (var neighbor in _neighbors)
         {
             if (neighbor == null) continue;
 
-            if (!Physics.Linecast(transform.position, neighbor.transform.position, _obstacleMask))
-                Gizmos.DrawLine(transform.position, neighbor.transform.position);
+            Gizmos.DrawLine(transform.position, neighbor.transform.position);
         }
     }
 }

@@ -8,6 +8,7 @@ public class Character : MonoBehaviour, IDamageable
     [Header("Health")]
     [SerializeField] float _maxHealth;
     float _currentHealth;
+    public float CurrentHealth => _currentHealth;
 
     InputController _controller;
     CharacterMovement _movement;
