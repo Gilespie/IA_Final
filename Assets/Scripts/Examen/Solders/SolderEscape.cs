@@ -20,18 +20,9 @@ public class SolderEscape : State<NPCState>
     {
         _pathIndex = 0;
 
-        var start = PathManagerExamen.Instance.Closest(_solder.transform.position);
-        var end = PathManagerExamen.Instance.Closest(_savePlace.position);
-
-        if (start == null || end == null)
-        {
-            _fsm.ChangeState(NPCState.FollowToLider);
-            return;
-        }
-
         _path = PathManagerExamen.Instance.GetPath(
-            start.transform.position,
-            end.transform.position
+            _solder.transform.position,
+            _savePlace.position
         );
 
         if (_path == null || _path.Count == 0)

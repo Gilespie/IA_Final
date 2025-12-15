@@ -4,6 +4,7 @@ public enum NPCState
     Patrol,
     Hunt,
     Persuit,
+    Wandering,
     GoLastTargetPoint,
     FollowToClick,
     Escape,

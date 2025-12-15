@@ -5,12 +5,14 @@ public class SolderFollowToLiderByPath : State<NPCState>
 {
     Solder _solder;
     List<Graph> _path = new List<Graph>();
+    HealthSystem _healthSystem;
     int _pathIndex = 0;
     float _stopDistance = 1f;
 
-    public SolderFollowToLiderByPath(FSM<NPCState> fsm, Solder solder) : base(fsm)
+    public SolderFollowToLiderByPath(FSM<NPCState> fsm, Solder solder, HealthSystem healthSystem) : base(fsm)
     {
         _solder = solder;
+        _healthSystem = healthSystem;
     }
 
     public override void Enter()
@@ -23,18 +25,9 @@ public class SolderFollowToLiderByPath : State<NPCState>
 
         _pathIndex = 0;
 
-        var start = PathManagerExamen.Instance.Closest(_solder.transform.position);
-        var end = PathManagerExamen.Instance.Closest(_solder.Lider.transform.position);
-
-        if (start == null || end == null)
-        {
-            _fsm.ChangeState(NPCState.FollowToLider);
-            return;
-        }
-
         _path = PathManagerExamen.Instance.GetPath(
-            start.transform.position,
-            end.transform.position
+            _solder.transform.position,
+            _solder.Lider.transform.position
         );
 
         if (_path == null || _path.Count == 0)
@@ -52,6 +45,12 @@ public class SolderFollowToLiderByPath : State<NPCState>
         if (_path == null || _path.Count == 0)
         {
             _fsm.ChangeState(NPCState.FollowToLider);
+            return;
+        }
+
+        if (_healthSystem.IsLowHealth())
+        {
+            _fsm.ChangeState(NPCState.Escape);
             return;
         }
 

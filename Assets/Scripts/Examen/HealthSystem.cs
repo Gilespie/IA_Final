@@ -3,6 +3,7 @@ using UnityEngine;
 public class HealthSystem : MonoBehaviour, IDamageable
 {
     [SerializeField] float _maxHealth = 100f;
+    [SerializeField] float _lowHealthLimit = 40f;
 
     float _currentHealth;
     public float CurrentHealth => _currentHealth;
@@ -24,5 +25,5 @@ public class HealthSystem : MonoBehaviour, IDamageable
         }
     }
 
-    public bool IsLowHealth() => _currentHealth <= 30f;
+    public bool IsLowHealth() => _currentHealth <= _lowHealthLimit;
 }

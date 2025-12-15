@@ -32,8 +32,6 @@ public class Lider : SteeringBase
     int _pathIndex;
     public int PathIndex => _pathIndex;
 
-    public Graph CurrentNode => PathManagerExamen.Instance.Closest(transform.position);
-
     [SerializeField] LayerMask _groundMask;
 
     protected override void Awake()
@@ -55,6 +53,7 @@ public class Lider : SteeringBase
         var idle = new LiderIdle(_fsm, this);
         var followToClick = new LiderGoToClick(_fsm,this);
         var persuit = new LiderPersuit(_fsm, this);
+        var wandering = new LiderWandering(_fsm, this);
 
         idle.AddTransition(NPCState.FollowToClick, followToClick);
         idle.AddTransition(NPCState.Persuit, persuit);
@@ -65,11 +64,13 @@ public class Lider : SteeringBase
         persuit.AddTransition(NPCState.Idle, idle);
         persuit.AddTransition(NPCState.FollowToClick, followToClick);
 
+        wandering.AddTransition(NPCState.Persuit, persuit);
 
-        _fsm.SetInnitialFSM(idle);
+        if(_isControlable) _fsm.SetInnitialFSM(idle);
+        else _fsm.SetInnitialFSM(wandering);
     }
 
-    private void Update()
+    void Update()
     {
         if(_isControlable)
         {
@@ -82,17 +83,17 @@ public class Lider : SteeringBase
         _fsm.OnUpdate();
     }
 
-    public void WalkRandom()
-    {
-        AddForce(Wander());
-        Move();
-    }
-
     public void PersuitTarget()
     {
         if (_enemyTarget == null) return;
 
-        AddForce(Seek(_enemyTarget.position) * _persuitSpeed);
+        AddForce(Seek(_enemyTarget.position));
+        Move();
+    }
+
+    public void Wandering(Vector3 position)
+    {
+        AddForce(Arrive(position));
         Move();
     }
 

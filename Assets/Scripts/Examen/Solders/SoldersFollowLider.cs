@@ -1,10 +1,12 @@
 public class SoldersFollowLider : State<NPCState>
 {
     Solder _solder;
+    HealthSystem _healthSystem;
 
-    public SoldersFollowLider(FSM<NPCState> fsm, Solder solder, Lider lider) : base(fsm)
+    public SoldersFollowLider(FSM<NPCState> fsm, Solder solder, HealthSystem healthSystem) : base(fsm)
     {
         _solder = solder;
+        _healthSystem = healthSystem;
     }
 
     public override void Execute()
@@ -17,6 +19,12 @@ public class SoldersFollowLider : State<NPCState>
             return;
         }
 
+        if (_healthSystem.IsLowHealth())
+        {
+            _fsm.ChangeState(NPCState.Escape);
+            return;
+        }
+
         if (_solder.LeaderInSight())
         {
             
@@ -25,6 +33,7 @@ public class SoldersFollowLider : State<NPCState>
         else
         {
             _fsm.ChangeState(NPCState.FollowToLiderByPath);
+            return;
         }
     }
 }

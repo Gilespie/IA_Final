@@ -12,9 +12,10 @@ public class SteeringBase : MonoBehaviour
     [SerializeField] protected float _personalArea;
     [SerializeField] protected float _avoidanceWeight;
     [SerializeField] protected LayerMask _obstacleMask;
-    [SerializeField] float _wanderRadius = 2f;
+    /*[SerializeField] float _wanderRadius = 2f;
     [SerializeField] float _wanderDistance = 3f;
-    [SerializeField] float _wanderJitter = 0.2f;
+    [SerializeField] float _wanderJitter = 0.2f;*/
+    [SerializeField] float _rotationSpeed = 8f;
 
     Vector3 _wanderTarget = Vector3.forward;
     protected Vector3 _velocity;
@@ -127,7 +128,7 @@ public class SteeringBase : MonoBehaviour
         return CalculateSteering(desired);
     }
 
-    public Vector3 Wander()
+    /*public Vector3 Wander()
     {
         _wanderTarget += new Vector3(
             UnityEngine.Random.Range(-1f, 1f) * _wanderJitter,
@@ -143,7 +144,7 @@ public class SteeringBase : MonoBehaviour
             _wanderTarget;
 
         return Seek(targetWorld);
-    }
+    }*/
 
     public Vector3 CalculateSteering(Vector3 desired)
     {
@@ -163,10 +164,13 @@ public class SteeringBase : MonoBehaviour
     public void AddForce(Vector3 force)
     {
         Vector3 desiredVelocity = _velocity + force;
+        desiredVelocity.y = 0f;
 
         Vector3 avoidance = _avoid.ChangeVelocity(desiredVelocity) * _avoidanceWeight;
+        avoidance.y = 0f;
 
         _velocity = Vector3.ClampMagnitude(desiredVelocity + avoidance, _maxSpeed);
+        _velocity.y = 0f;
     }
 
     public void Move()
@@ -175,8 +179,19 @@ public class SteeringBase : MonoBehaviour
             return;
 
         transform.position += _velocity * Time.deltaTime;
-        transform.forward = _velocity;
+        //transform.forward = _velocity;
+        Vector3 dir = _velocity.normalized;
 
-        _velocity *= 0.95f; // damping
+        if (dir.sqrMagnitude > 0.001f)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(dir);
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRot,
+                _rotationSpeed * Time.deltaTime
+            );
+        }
+
+        _velocity *= 0.95f;
     }
 }

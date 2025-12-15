@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public class LiderIdle : State<NPCState>
 {
     Lider _lider;
@@ -7,11 +5,6 @@ public class LiderIdle : State<NPCState>
     public LiderIdle(FSM<NPCState> fsm, Lider lider) : base(fsm)
     {
         _lider = lider;
-    }
-
-    public override void Enter()
-    {
-        Debug.Log("CLICKED");
     }
 
     public override void Execute()
@@ -30,10 +23,6 @@ public class LiderIdle : State<NPCState>
             {
                 _fsm.ChangeState(NPCState.FollowToClick);
             }
-        }
-        else
-        {
-            _lider.WalkRandom();
         }
     }
 }

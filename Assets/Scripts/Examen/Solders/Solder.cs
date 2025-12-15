@@ -45,27 +45,31 @@ public class Solder : SteeringBase
     {
         _fsm = new FSM<NPCState>();
 
-        var followToLider = new SoldersFollowLider(_fsm, this, _lider);
+        var followToLider = new SoldersFollowLider(_fsm, this, _healthSystem);
         var escape = new SolderEscape(_fsm, this, _saveNode);
         var persuit = new SolderPersuit(_fsm, this, _healthSystem);
-        var followToliderByPath = new SolderFollowToLiderByPath(_fsm, this);
+        var followToliderByPath = new SolderFollowToLiderByPath(_fsm, this, _healthSystem);
 
         followToLider.AddTransition(NPCState.Escape, escape);
         followToLider.AddTransition(NPCState.Persuit, persuit);
         followToLider.AddTransition(NPCState.FollowToLiderByPath, followToliderByPath);
 
-        escape.AddTransition(NPCState.Persuit, persuit);
-        escape.AddTransition(NPCState.FollowToLider, followToLider);
-        escape.AddTransition(NPCState.FollowToLiderByPath, followToliderByPath);
+        //escape.AddTransition(NPCState.Persuit, persuit);
+        //escape.AddTransition(NPCState.FollowToLider, followToLider);
+        //escape.AddTransition(NPCState.FollowToLiderByPath, followToliderByPath);
 
         persuit.AddTransition(NPCState.FollowToLider, followToLider);
         persuit.AddTransition(NPCState.Escape, escape);
         persuit.AddTransition(NPCState.FollowToLiderByPath, followToliderByPath);
 
+        followToliderByPath.AddTransition(NPCState.Persuit, persuit);
+        followToliderByPath.AddTransition(NPCState.FollowToLider, followToLider);
+        followToliderByPath.AddTransition(NPCState.Escape, escape);
+
         _fsm.SetInnitialFSM(followToLider);
     }
 
-    private void Update()
+    void Update()
     {
         _fsm.OnUpdate();
     }
@@ -128,7 +132,7 @@ public class Solder : SteeringBase
         return _enemy != null && _fov.InFOV(_enemy.position);
     }
 
-    private Vector3 Separation()
+    Vector3 Separation()
     {
         Vector3 desired = Vector3.zero;
 
@@ -204,20 +208,16 @@ public class Solder : SteeringBase
                 ObstacleMask
             );
 
-            // Линия луча
             Gizmos.color = blocked ? Color.red : Color.green;
             Gizmos.DrawLine(origin, target);
 
-            // Точка попадания
             if (blocked)
             {
                 Gizmos.color = Color.red;
                 Gizmos.DrawWireSphere(hit.point, 0.15f);
             }
 
-            // Точка лидера
             Gizmos.color = Color.blue;
             Gizmos.DrawWireSphere(target, 0.2f);
-        
     }
 }

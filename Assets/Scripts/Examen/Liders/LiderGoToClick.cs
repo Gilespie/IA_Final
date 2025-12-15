@@ -4,7 +4,6 @@ public class LiderGoToClick : State<NPCState>
 {
     Lider _lider;
     float _distanceStopOffset = 0.5f;
-    float _followSpeed = 3f;
 
     public LiderGoToClick(FSM<NPCState> fsm, Lider lider) : base(fsm)
     {
@@ -13,18 +12,9 @@ public class LiderGoToClick : State<NPCState>
 
     public override void Enter()
     {
-        var start = _lider.CurrentNode;
-        var end = PathManagerExamen.Instance.Closest(_lider.ClickPosition);
-
-        if (start == null || end == null)
-        {
-            _fsm.ChangeState(NPCState.Idle);
-            return;
-        }
-
         var path = PathManagerExamen.Instance.GetPath(
-            start.transform.position,
-            end.transform.position
+            _lider.transform.position,
+            _lider.ClickPosition
         );
 
         if (path == null || path.Count == 0)

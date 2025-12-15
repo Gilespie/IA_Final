@@ -8,7 +8,6 @@ public class SolderPersuit : State<NPCState>
     float _attackRadius = 1f;
     float _attackTimer = 1f;
 
-
     public SolderPersuit(FSM<NPCState> fsm, Solder solder, HealthSystem healthSystem) : base(fsm)
     {
         _solder = solder;
@@ -26,10 +25,10 @@ public class SolderPersuit : State<NPCState>
         if (_healthSystem.IsLowHealth())
         {
             _fsm.ChangeState(NPCState.Escape);
+            return;
         }
 
         float distance = (_solder.EnemyTarget.position - _solder.transform.position).sqrMagnitude;
-
 
         if (distance >= _attackRadius * _attackRadius)
         {
@@ -45,13 +44,14 @@ public class SolderPersuit : State<NPCState>
           
                 dmgable.TakeDamage(_damage);
 
-                _attackTimer = 1f;
-
                 if (dmgable.CurrentHealth <= 0f)
                 {
                     _solder.ClearEnemyTarget(); 
                     _fsm.ChangeState(NPCState.Idle);
+                    return;
                 }
+
+                _attackTimer = 1f;
             }
         }
     }

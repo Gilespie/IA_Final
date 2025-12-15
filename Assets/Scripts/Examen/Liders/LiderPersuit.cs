@@ -3,7 +3,7 @@ using UnityEngine;
 public class LiderPersuit : State<NPCState>
 {
     Lider _lider;
-    float _damage = 20f;
+    float _damage = 15f;
     float _attackRadius = 1.5f;
     float _attackTimer = 1f;
 
@@ -16,7 +16,8 @@ public class LiderPersuit : State<NPCState>
     {
         if (!_lider.EnemyInFOV())
         {
-            _fsm.ChangeState(NPCState.Idle);
+            if(_lider.IsControlable) _fsm.ChangeState(NPCState.Idle);
+            else _fsm.ChangeState(NPCState.Wandering);
             return;
         }
 
@@ -24,7 +25,6 @@ public class LiderPersuit : State<NPCState>
 
         if (distance >= _attackRadius * _attackRadius)
         {
-            Debug.Log("Persuit");
             _lider.PersuitTarget();
         }
         else
@@ -41,7 +41,9 @@ public class LiderPersuit : State<NPCState>
 
                 if (dmgable.CurrentHealth <= 0f)
                 {
-                    _fsm.ChangeState(NPCState.Idle);
+                    if (_lider.IsControlable) _fsm.ChangeState(NPCState.Idle);
+                    else _fsm.ChangeState(NPCState.Wandering);
+                    return;
                 }
             }
         }
