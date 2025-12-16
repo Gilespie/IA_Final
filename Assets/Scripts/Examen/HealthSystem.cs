@@ -1,7 +1,9 @@
+using System;
 using UnityEngine;
 
 public class HealthSystem : MonoBehaviour, IDamageable
 {
+    public event Action<float> OnHealthChanged;
     [SerializeField] float _maxHealth = 100f;
     [SerializeField] float _lowHealthLimit = 40f;
 
@@ -13,11 +15,17 @@ public class HealthSystem : MonoBehaviour, IDamageable
         _currentHealth = _maxHealth;
     }
 
+    void Start()
+    {
+        OnHealthChanged?.Invoke(HealthNormalize());
+    }
+
     public void TakeDamage(float damage)
     {
         if (damage <= 0f) return;
 
         _currentHealth -= damage;
+        OnHealthChanged?.Invoke(HealthNormalize());
 
         if (_currentHealth <= 0f)
         {
@@ -26,4 +34,6 @@ public class HealthSystem : MonoBehaviour, IDamageable
     }
 
     public bool IsLowHealth() => _currentHealth <= _lowHealthLimit;
+
+    public float HealthNormalize() => _currentHealth/_maxHealth;
 }

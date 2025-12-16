@@ -17,12 +17,6 @@ public class SolderFollowToLiderByPath : State<NPCState>
 
     public override void Enter()
     {
-        if (_solder.Lider == null)
-        {
-            _fsm.ChangeState(NPCState.Escape);
-            return;
-        }
-
         _pathIndex = 0;
 
         _path = PathManagerExamen.Instance.GetPath(
@@ -45,6 +39,12 @@ public class SolderFollowToLiderByPath : State<NPCState>
         if (_path == null || _path.Count == 0)
         {
             _fsm.ChangeState(NPCState.FollowToLider);
+            return;
+        }
+
+        if (_solder.Lider == null)
+        {
+            _fsm.ChangeState(NPCState.Escape);
             return;
         }
 

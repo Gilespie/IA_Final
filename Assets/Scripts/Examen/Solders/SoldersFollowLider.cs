@@ -19,6 +19,12 @@ public class SoldersFollowLider : State<NPCState>
             return;
         }
 
+        if (_solder.Lider == null)
+        {
+            _fsm.ChangeState(NPCState.Escape);
+            return;
+        }
+
         if (_healthSystem.IsLowHealth())
         {
             _fsm.ChangeState(NPCState.Escape);

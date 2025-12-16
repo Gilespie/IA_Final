@@ -28,6 +28,12 @@ public class SolderPersuit : State<NPCState>
             return;
         }
 
+        if (_solder.Lider == null)
+        {
+            _fsm.ChangeState(NPCState.Escape);
+            return;
+        }
+
         float distance = (_solder.EnemyTarget.position - _solder.transform.position).sqrMagnitude;
 
         if (distance >= _attackRadius * _attackRadius)

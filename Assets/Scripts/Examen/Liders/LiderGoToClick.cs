@@ -92,6 +92,7 @@ public class LiderGoToClick : State<NPCState>
         if (last)
         {
             _lider.AddForce(_lider.Arrive(targetPos));
+
         }
         else
         {
