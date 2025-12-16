@@ -17,7 +17,7 @@ public class SteeringBase : MonoBehaviour
     [SerializeField] float _wanderJitter = 0.2f;*/
     [SerializeField] float _rotationSpeed = 8f;
 
-    Vector3 _wanderTarget = Vector3.forward;
+    //Vector3 _wanderTarget = Vector3.forward;
     protected Vector3 _velocity;
     public Vector3 Velocity => _velocity;
     protected ObstacleAvoidance _avoid;

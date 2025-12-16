@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -63,6 +62,7 @@ public class Lider : SteeringBase
 
         persuit.AddTransition(NPCState.Idle, idle);
         persuit.AddTransition(NPCState.FollowToClick, followToClick);
+        persuit.AddTransition(NPCState.Wandering, wandering);
 
         wandering.AddTransition(NPCState.Persuit, persuit);
 

@@ -47,7 +47,7 @@ public class SolderPersuit : State<NPCState>
                 if (dmgable.CurrentHealth <= 0f)
                 {
                     _solder.ClearEnemyTarget(); 
-                    _fsm.ChangeState(NPCState.Idle);
+                    _fsm.ChangeState(NPCState.FollowToLider);
                     return;
                 }
 
