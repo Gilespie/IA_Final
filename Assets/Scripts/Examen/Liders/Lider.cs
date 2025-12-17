@@ -96,6 +96,10 @@ public class Lider : SteeringBase
         AddForce(Arrive(position));
         Move();
     }
+    public void ClearEnemyTarget()
+    {
+        _enemyTarget = null;
+    }
 
     public void ClearClick()
     {

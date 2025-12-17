@@ -11379,6 +11379,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Lider1
       objectReference: {fileID: 0}
+    - target: {fileID: 6689340358160237531, guid: 392e4ad6fd9e8d44097559876eb5bde6, type: 3}
+      propertyPath: m_FillAmount
+      value: 0.502
+      objectReference: {fileID: 0}
+    - target: {fileID: 8975851173058511582, guid: 392e4ad6fd9e8d44097559876eb5bde6, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

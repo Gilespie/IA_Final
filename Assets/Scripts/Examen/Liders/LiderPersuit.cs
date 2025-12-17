@@ -14,6 +14,8 @@ public class LiderPersuit : State<NPCState>
 
     public override void Execute()
     {
+
+
         if (!_lider.EnemyInFOV())
         {
             if(_lider.IsControlable) _fsm.ChangeState(NPCState.Idle);
@@ -33,7 +35,7 @@ public class LiderPersuit : State<NPCState>
 
             if (_attackTimer <= 0)
             {
-                if(_lider.EnemyTarget.TryGetComponent<IDamageable>(out IDamageable dmgable))
+                if(_lider.EnemyTarget.TryGetComponent<IDamageable>(out var dmgable))
 
                 dmgable.TakeDamage(_damage);
 
@@ -41,6 +43,8 @@ public class LiderPersuit : State<NPCState>
 
                 if (dmgable.CurrentHealth <= 0f)
                 {
+                    _lider.ClearEnemyTarget();
+
                     if (_lider.IsControlable) _fsm.ChangeState(NPCState.Idle);
                     else _fsm.ChangeState(NPCState.Wandering);
                     return;
