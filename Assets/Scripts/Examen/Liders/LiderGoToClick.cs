@@ -29,39 +29,6 @@ public class LiderGoToClick : State<NPCState>
         _lider.SetPath(path);
     }
 
-    /*public override void Execute()
-    {
-        _lider.FindTargetInFOV();
-
-        if (_lider.EnemyInFOV())
-        {
-            _fsm.ChangeState(NPCState.Persuit);
-            return;
-        }
-
-        if (_lider.PathIndex >= _lider.Path.Count)
-        {
-            Finish();
-            return;
-        }
-
-        Vector3 dir = _lider.Path[_lider.PathIndex].transform.position - _lider.transform.position;
-
-        if (dir.sqrMagnitude <= _distanceStopOffset * _distanceStopOffset)
-        {
-            _lider.NextPooint();
-
-            if (_lider.PathIndex >= _lider.Path.Count)
-            {
-                Finish();
-                return;
-            }
-        }
-
-        _lider.transform.position += dir.normalized * _followSpeed * Time.deltaTime;
-        _lider.transform.forward = dir;
-    }*/
-
     public override void Execute()
     {
         _lider.FindTargetInFOV();
